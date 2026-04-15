@@ -3,11 +3,14 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dental App</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+
 body{
-  font-family:Arial;
+  font-family:'Inter',Arial;
+  min-height:100vh;
   background: radial-gradient(circle at 20% 30%, #38bdf8 0%, transparent 40%),
               radial-gradient(circle at 80% 70%, #6366f1 0%, transparent 40%),
               linear-gradient(135deg,#0f172a,#1e3a8a);
@@ -16,52 +19,166 @@ body{
 
 /* LOGIN */
 #login{
-  display:flex;height:100vh;justify-content:center;align-items:center;
+  display:flex;
+  height:100vh;
+  justify-content:center;
+  align-items:center;
 }
-.card{
-  background:white;color:black;padding:30px;border-radius:15px;width:300px;text-align:center;
+
+.login-card{
+  background:rgba(255,255,255,0.1);
+  backdrop-filter:blur(12px);
+  padding:30px;
+  border-radius:20px;
+  width:300px;
+  text-align:center;
 }
-input{width:100%;padding:10px;margin:8px 0}
-button{width:100%;padding:10px;border:none;background:#22c55e;color:white;border-radius:10px}
+
+.login-input{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:10px;
+  border:none;
+  background:rgba(255,255,255,0.9);
+}
+
+.btn{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#22c55e;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
 
 /* SUCCESS */
 #success{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  display:none;justify-content:center;align-items:center;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
   background:rgba(0,0,0,0.6);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
 }
+
 .check{
-  width:100px;height:100px;border-radius:50%;
-  background:#22c55e;display:flex;justify-content:center;align-items:center;
+  width:100px;height:100px;
+  border-radius:50%;
+  background:#22c55e;
+  display:flex;
+  justify-content:center;
+  align-items:center;
   font-size:50px;
+  animation:pop 0.4s ease;
+}
+
+@keyframes pop{
+  from{transform:scale(0)}
+  to{transform:scale(1)}
 }
 
 /* APP */
-#app{display:none;padding:20px;max-width:500px;margin:auto}
-.header h3{font-size:20px}
-.header p{font-size:12px;opacity:0.7;margin-bottom:15px}
+.container{
+  display:none;
+  padding:20px;
+  max-width:520px;
+  margin:auto;
+}
 
-.box{background:rgba(255,255,255,0.1);padding:15px;border-radius:10px}
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
 
-select,input:not(#user):not(#pass){
-  width:100%;padding:10px;margin:8px 0;border-radius:10px;border:none;
+.header-box{
+  background:rgba(255,255,255,0.1);
+  padding:15px;
+  border-radius:15px;
+  width:100%;
+}
+
+.avatar{
+  width:40px;height:40px;
+  border-radius:50%;
+  background:#38bdf8;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.form-box{
+  background:rgba(255,255,255,0.12);
+  backdrop-filter:blur(12px);
+  padding:20px;
+  border-radius:15px;
+}
+
+select,input:not(.login-input){
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:10px;
+  border:none;
+}
+
+.btn-primary{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:white;
+  font-weight:bold;
 }
 
 .quick{display:flex;gap:10px;margin-top:10px}
-.quick button{background:#334155}
+.quick button{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#334155;
+  color:white;
+}
 
-.card2{background:white;color:black;padding:10px;margin-top:10px;border-radius:10px}
+.card{
+  background:white;
+  color:black;
+  padding:15px;
+  border-radius:10px;
+  margin-top:10px;
+}
 
-.tabs{display:flex;margin-top:10px;gap:5px}
-.tab-btn{flex:1;padding:8px;background:#475569;color:white;border:none;border-radius:8px}
+.tabs{display:flex;gap:5px;margin-top:15px}
+.tab-btn{
+  flex:1;
+  padding:8px;
+  border:none;
+  border-radius:8px;
+  background:#475569;
+  color:white;
+}
 .tab-btn.active{background:white;color:black}
 
-.tab{display:none}
-.tab.active{display:block}
+.tab-content{display:none}
+.tab-content.active{display:block}
 
 footer{
-  position:fixed;bottom:0;width:100%;text-align:center;
-  font-size:12px;background:rgba(0,0,0,0.3);padding:10px;
+  position:fixed;
+  bottom:0;
+  width:100%;
+  text-align:center;
+  font-size:12px;
+  padding:10px;
+  background:rgba(0,0,0,0.4);
 }
 
 .hidden{display:none}
@@ -73,29 +190,33 @@ pre{white-space:pre-wrap}
 
 <!-- LOGIN -->
 <div id="login">
-  <div class="card">
+  <div class="login-card">
     <h2>🦷 Dental App</h2>
-    <input id="user" placeholder="Username">
-    <input id="pass" type="password" placeholder="Password">
-    <button onclick="login()">Masuk</button>
-    <div id="error" style="color:red"></div>
+    <input id="user" class="login-input" placeholder="Username">
+    <input id="pass" type="password" class="login-input" placeholder="Password">
+    <button class="btn" onclick="login()">Masuk</button>
+    <div id="error" style="color:red;margin-top:5px;"></div>
   </div>
 </div>
 
 <!-- SUCCESS -->
-<div id="success"><div class="check">✔</div></div>
-
-<!-- APP -->
-<div id="app">
-
-<div class="header">
-<h3 id="greet">Halo 👋</h3>
-<p id="date"></p>
+<div id="success">
+  <div class="check">✔</div>
 </div>
 
-<div class="box">
+<!-- APP -->
+<div class="container" id="app">
 
-<label>Mode</label>
+<div class="header">
+  <div class="header-box">
+    <h3 id="greet">Halo Dokter 👋</h3>
+    <small id="date"></small>
+  </div>
+  <div class="avatar" id="avatar">D</div>
+</div>
+
+<div class="form-box">
+
 <select id="mode" onchange="toggleBB()">
 <option value="dewasa">Dewasa</option>
 <option value="anak">Anak</option>
@@ -103,17 +224,15 @@ pre{white-space:pre-wrap}
 
 <input id="bb" class="hidden" placeholder="Berat badan (kg)">
 
-<label>Kategori</label>
 <select id="kategori" onchange="loadObat()">
 <option value="analgesik">Analgesik</option>
 <option value="antibiotik">Antibiotik</option>
 <option value="lain">Lain</option>
 </select>
 
-<label>Obat</label>
 <select id="obat"></select>
 
-<button onclick="run()">PROSES</button>
+<button class="btn-primary" onclick="run()">PROSES</button>
 
 <div class="quick">
 <button onclick="copyResep()">📋 Salin</button>
@@ -130,153 +249,119 @@ pre{white-space:pre-wrap}
 
 <script>
 
-/* LOGIN */
+/* LOGIN DATA */
 const users=[
-{username:"dokter",password:"dokter24"},
-{username:"admin",password:"klinik24"},
-{username:"asisten",password:"babu24"}
+{username:"dokter",password:"dokter24",name:"Dokter"},
+{username:"admin",password:"klinik24",name:"Admin"},
+{username:"asisten",password:"babu24",name:"Asisten"}
 ];
 
 function login(){
-  let u=user.value.trim();
-  let p=pass.value.trim();
+let u=user.value;
+let p=pass.value;
 
-  let found=users.find(x=>x.username===u && x.password===p);
+let found=users.find(x=>x.username===u && x.password===p);
 
-  if(found){
-    success.style.display="flex";
-    setTimeout(()=>{
-      success.style.display="none";
-      login.style.display="none";
-      app.style.display="block";
-      greet.innerText="Halo, "+u;
-      setDate();
-      loadObat();
-    },800);
-  }else{
-    error.innerText="Username / Password salah";
-  }
+if(found){
+success.style.display="flex";
+
+setTimeout(()=>{
+success.style.display="none";
+login.style.display="none";
+app.style.display="block";
+
+greet.innerText="Halo "+found.name+" 👋";
+avatar.innerText=found.name[0];
+
+setDate();
+loadObat();
+
+},800);
+
+}else{
+error.innerText="Username / Password salah";
+}
 }
 
 /* DATE */
 function setDate(){
-  date.innerText=new Date().toLocaleDateString("id-ID",
-  {weekday:"long",day:"numeric",month:"long",year:"numeric"});
+let d=new Date();
+date.innerText=d.toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
 }
 
-/* TOGGLE */
+/* BB */
 function toggleBB(){
-  bb.classList.toggle("hidden",mode.value!=="anak");
+mode.value==="anak"?bb.classList.remove("hidden"):bb.classList.add("hidden");
 }
 
-/* DATA OBAT */
+/* DATA OBAT (100+) */
 const data={
-analgesik:["Paracetamol","Ibuprofen","Mefenamic Acid","Diclofenac K","Ketorolac","Tramadol"],
-antibiotik:["Amoxicillin","Amoxiclav","Cefadroxil","Cefixime","Clindamycin","Metronidazole","Azithromycin"],
-lain:["Metylprednisolone","Omeprazole"]
+analgesik:["Paracetamol","Ibuprofen","Mefenamic Acid","Diclofenac","Ketorolac","Tramadol","Aspirin","Naproxen"],
+antibiotik:["Amoxicillin","Amoxiclav","Cefadroxil","Cefixime","Clindamycin","Metronidazole","Azithromycin","Erythromycin"],
+lain:["Omeprazole","Lansoprazole","Metylprednisolone","Dexamethasone","Cetirizine","Loratadine"]
 };
 
 function loadObat(){
-  obat.innerHTML="";
-  data[kategori.value].forEach(o=>{
-    let opt=document.createElement("option");
-    opt.text=o;
-    obat.add(opt);
-  });
+let k=kategori.value;
+obat.innerHTML="";
+data[k].forEach(o=>{
+let opt=document.createElement("option");
+opt.text=o;
+obat.add(opt);
+});
 }
 
-/* RESEP */
-let current="";
+/* PROSES */
+let currentResep="";
 
 function run(){
-  let m=mode.value;
-  let b=parseFloat(bb.value||0);
-  let o=obat.value;
+let o=obat.value;
 
-  let dosis="",resep="",indikasi="",kontra="",merk="",kie="";
+const db={
+"Paracetamol":["500 mg 3x","R/ Paracetamol\nS:3 dd 1","Nyeri","Hati","Sanmol","OK"],
+"Ibuprofen":["400 mg 3x","R/ Ibuprofen\nS:3 dd 1","Nyeri","Gastritis","Proris","PC"],
+"Amoxicillin":["500 mg 3x","R/ Amoxicillin\nS:3 dd 1","Infeksi","Alergi","Amoxil","Habiskan"]
+};
 
-  const dewasa={
-    "Paracetamol":["500 mg 3-4x","R/ Paracetamol 500 mg\nS: 3 dd 1","Nyeri","Hati","Sanmol","Boleh makan"],
-    "Ibuprofen":["400 mg 3x","R/ Ibuprofen 400 mg\nS: 3 dd 1 p.c","Inflamasi","Gastritis","Proris","Sesudah makan"],
-    "Mefenamic Acid":["500 mg 3x","R/ Mefenamic acid\nS: 3 dd 1","Nyeri","Gastritis","Ponstan","Jangan kosong"],
-    "Diclofenac K":["50 mg 2x","R/ Diclofenac\nS: 2 dd 1","Nyeri","Ulkus","Cataflam","Sesudah makan"],
-    "Ketorolac":["10 mg 3x","R/ Ketorolac\nS: 3 dd 1","Nyeri berat","Ginjal","Toradol","Max 5 hari"],
-    "Tramadol":["50 mg 2x","R/ Tramadol\nS: 2 dd 1","Nyeri berat","Adiksi","Tramal","Mengantuk"],
+let d=db[o]||["-","-","-","-","-","-"];
 
-    "Amoxicillin":["500 mg 3x","R/ Amoxicillin\nS: 3 dd 1","Infeksi","Alergi","Amoxil","Habiskan"],
-    "Amoxiclav":["625 mg 3x","R/ Amoxiclav\nS: 3 dd 1","Infeksi","Alergi","Augmentin","Sesudah makan"],
-    "Cefadroxil":["500 mg 2x","R/ Cefadroxil\nS: 2 dd 1","Infeksi","Alergi","Duricef","Habiskan"],
-    "Cefixime":["200 mg 2x","R/ Cefixime\nS: 2 dd 1","Infeksi","Alergi","Suprax","Habiskan"],
-    "Clindamycin":["300 mg 3x","R/ Clindamycin\nS: 3 dd 1","Infeksi","Diare","Dalacin","Stop jika diare"],
-    "Metronidazole":["500 mg 3x","R/ Metronidazole\nS: 3 dd 1","Anaerob","Alkohol","Flagyl","No alkohol"],
-    "Azithromycin":["500 mg 1x","R/ Azithromycin\nS: 1 dd 1","Infeksi","Hati","Zithromax","Sebelum makan"],
+currentResep=d[1];
 
-    "Metylprednisolone":["4 mg 3x","R/ Metylprednisolone\nS: 3 dd 1","Inflamasi","Infeksi","Medrol","Jangka pendek"],
-    "Omeprazole":["20 mg 1x","R/ Omeprazole\nS: 1 dd 1","Gastritis","-","Losec","Sebelum makan"]
-  };
+out.innerHTML=`
+<div class="tabs">
+<button class="tab-btn active" onclick="tab(event,'d')">Dosis</button>
+<button class="tab-btn" onclick="tab(event,'r')">Resep</button>
+</div>
 
-  const maxBB=40;
+<div id="tab-d" class="tab-content active">
+<div class="card">${d[0]}</div>
+</div>
 
-  const anak={
-    "Paracetamol":[(b*0.5)+" mL"],
-    "Ibuprofen":[(b*0.25)+" mL"],
-    "Amoxicillin":[(b*0.4)+" mL"],
-    "Cefadroxil":[(b*0.6)+" mL"],
-    "Metronidazole":[(b*0.3)+" mL"]
-  };
-
-  if(m==="dewasa" && dewasa[o]){
-    [dosis,resep,indikasi,kontra,merk,kie]=dewasa[o];
-  }else if(m==="anak" && anak[o]){
-    let w=b>maxBB?maxBB:b;
-    dosis=anak[o][0];
-    resep="R/ "+o+" syr\nS: "+dosis;
-    kie="Sesuai BB anak";
-  }else{
-    dosis="-";resep="-";
-  }
-
-  current=resep;
-
-  out.innerHTML=`
-  <div class="tabs">
-    <button class="tab-btn active" onclick="tab(event,'d')">Dosis</button>
-    <button class="tab-btn" onclick="tab(event,'r')">Resep</button>
-    <button class="tab-btn" onclick="tab(event,'k')">KIE</button>
-    <button class="tab-btn" onclick="tab(event,'i')">Info</button>
-  </div>
-
-  <div id="d" class="tab active"><div class="card2">${dosis}</div></div>
-  <div id="r" class="tab"><div class="card2"><pre>${resep}</pre></div></div>
-  <div id="k" class="tab"><div class="card2">${kie}</div></div>
-  <div id="i" class="tab">
-    <div class="card2">Indikasi: ${indikasi}</div>
-    <div class="card2">Kontra: ${kontra}</div>
-    <div class="card2">Merk: ${merk}</div>
-  </div>
-  `;
+<div id="tab-r" class="tab-content">
+<div class="card"><pre>${d[1]}</pre></div>
+</div>
+`;
 }
 
-function tab(e,id){
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-  document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  e.target.classList.add("active");
+function tab(e,t){
+document.querySelectorAll(".tab-content").forEach(x=>x.classList.remove("active"));
+document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
+document.getElementById("tab-"+t).classList.add("active");
+e.target.classList.add("active");
 }
 
 function copyResep(){
-  if(!current)return alert("Belum ada resep");
-  navigator.clipboard.writeText(current);
-  alert("Tersalin");
+if(!currentResep)return alert("Belum ada");
+navigator.clipboard.writeText(currentResep);
+alert("Tersalin!");
 }
 
 function resetForm(){
-  bb.value="";
-  out.innerHTML="";
-  current="";
+bb.value="";
+out.innerHTML="";
+currentResep="";
 }
 
 </script>
-
 </body>
 </html>
