@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dental App</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:'Inter',Arial;
+  min-height:100vh;
+  background: radial-gradient(circle at 20% 30%, #38bdf8 0%, transparent 40%),
+              radial-gradient(circle at 80% 70%, #6366f1 0%, transparent 40%),
+              linear-gradient(135deg,#0f172a,#1e3a8a);
+  color:white;
+}
+
+/* LOGIN */
+#login{
+  display:flex;
+  height:100vh;
+  justify-content:center;
+  align-items:center;
+}
+
+.login-card{
+  background:white;
+  padding:30px;
+  border-radius:20px;
+  width:300px;
+  text-align:center;
+  color:black;
+}
+
+.login-input{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:10px;
+  border:none;
+  background:#eef6f9;
+}
+
+.btn{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#22c55e;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* SUCCESS */
+#success{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.check{
+  width:100px;height:100px;
+  border-radius:50%;
+  background:#22c55e;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:50px;
+  animation:pop 0.4s ease;
+}
+
+@keyframes pop{
+  from{transform:scale(0)}
+  to{transform:scale(1)}
+}
+
+/* APP */
+.container{
+  display:none;
+  max-width:520px;
+  margin:auto;
+  padding:20px;
+}
+
+/* HEADER */
+.header{
+  margin-bottom:20px;
+}
+
+.header h3{
+  font-size:20px;
+}
+
+.header p{
+  font-size:12px;
+  opacity:0.8;
+}
+
+/* BOX */
+.form-box{
+  background:rgba(255,255,255,0.12);
+  padding:20px;
+  border-radius:15px;
+}
+
+select,input:not(.login-input){
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:10px;
+  border:none;
+}
+
+.btn-primary{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.quick{display:flex;gap:10px;margin-top:10px}
+.quick button{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#334155;
+  color:white;
+}
+
+/* RESULT */
+.card{
+  background:white;
+  color:black;
+  padding:15px;
+  border-radius:10px;
+  margin-top:10px;
+}
+
+.tabs{display:flex;gap:5px;margin-top:15px}
+.tab-btn{
+  flex:1;
+  padding:8px;
+  border:none;
+  border-radius:8px;
+  background:#475569;
+  color:white;
+}
+.tab-btn.active{background:white;color:black}
+
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+.hidden{display:none}
+
+/* FOOTER */
+footer{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  text-align:center;
+  font-size:12px;
+  padding:10px;
+  background:rgba(0,0,0,0.3);
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-card">
+    <h2>🦷 Dental App</h2>
+    <input id="user" class="login-input" placeholder="Username">
+    <input id="pass" type="password" class="login-input" placeholder="Password">
+    <button class="btn" onclick="login()">Masuk</button>
+    <div id="error" style="color:red;"></div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="success">
+  <div class="check">✔</div>
+</div>
+
+<!-- APP -->
+<div class="container" id="app">
+
+<div class="header">
+  <h3 id="greet">Halo 👋</h3>
+  <p id="date"></p>
+</div>
+
+<div class="form-box">
+
+<select id="mode" onchange="toggleBB()">
+<option value="dewasa">Dewasa</option>
+<option value="anak">Anak</option>
+</select>
+
+<input id="bb" class="hidden" placeholder="Berat badan (kg)">
+
+<select id="kategori" onchange="loadObat()">
+<option value="analgesik">Analgesik</option>
+<option value="antibiotik">Antibiotik</option>
+<option value="lain">Lain</option>
+</select>
+
+<select id="obat"></select>
+
+<button class="btn-primary" onclick="run()">PROSES</button>
+
+<div class="quick">
+<button onclick="copyResep()">📋 Salin</button>
+<button onclick="resetForm()">🔄 Reset</button>
+</div>
+
+</div>
+
+<div id="out"></div>
+
+</div>
+
+<footer>© 2026 Dental App • DENTALE SPT</footer>
+
+<script>
+
+/* USER */
+const users=[
+{username:"dokter",password:"dokter24",name:"Dokter"},
+{username:"admin",password:"klinik24",name:"Admin"},
+{username:"asisten",password:"babu24",name:"Asisten"}
+];
+
+function login(){
+  let u=user.value;
+  let p=pass.value;
+
+  let found=users.find(x=>x.username===u && x.password===p);
+
+  if(found){
+    success.style.display="flex";
+
+    setTimeout(()=>{
+      success.style.display="none";
+      login.style.display="none";
+      app.style.display="block";
+
+      greet.innerText="Halo, "+found.name+" 👋";
+      setDate();
+      loadObat();
+
+    },800);
+
+  }else{
+    error.innerText="Login salah";
+  }
+}
+
+/* DATE */
+function setDate(){
+  let d=new Date();
+  date.innerText=d.toLocaleDateString("id-ID",{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+
+/* OBAT */
+const data={
+analgesik:["Paracetamol","Ibuprofen","Mefenamic Acid"],
+antibiotik:["Amoxicillin","Cefadroxil"],
+lain:["Omeprazole"]
+};
+
+function loadObat(){
+  let k=kategori.value;
+  obat.innerHTML="";
+  data[k].forEach(o=>{
+    let opt=document.createElement("option");
+    opt.text=o;
+    obat.add(opt);
+  });
+}
+
+/* LOGIC */
+let currentResep="";
+
+function run(){
+  let o=obat.value;
+
+  let resep="R/ "+o+"\nS: 3 dd 1";
+
+  currentResep=resep;
+
+  out.innerHTML=`
+  <div class="card"><pre>${resep}</pre></div>
+  `;
+}
+
+function copyResep(){
+  navigator.clipboard.writeText(currentResep);
+  alert("Tersalin!");
+}
+
+function resetForm(){
+  out.innerHTML="";
+}
+
+</script>
+
+</body>
+</html>
