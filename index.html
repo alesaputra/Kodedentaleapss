@@ -5,60 +5,132 @@
 <title>Dental App</title>
 
 <style>
+*{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:Arial;
-  background:#0f172a;
+  background: radial-gradient(circle at 20% 30%, #38bdf8 0%, transparent 40%),
+              radial-gradient(circle at 80% 70%, #6366f1 0%, transparent 40%),
+              linear-gradient(135deg,#0f172a,#1e3a8a);
   color:white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
 }
 
 /* LOGIN */
 #login{
-  background:white;
-  color:black;
-  padding:30px;
-  border-radius:15px;
-  width:280px;
-  text-align:center;
+  display:flex;height:100vh;justify-content:center;align-items:center;
+}
+.card{
+  background:white;color:black;padding:30px;border-radius:15px;width:300px;text-align:center;
+}
+input{width:100%;padding:10px;margin:8px 0}
+button{width:100%;padding:10px;border:none;background:#22c55e;color:white;border-radius:10px}
+
+/* SUCCESS */
+#success{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  display:none;justify-content:center;align-items:center;
+  background:rgba(0,0,0,0.6);
+}
+.check{
+  width:100px;height:100px;border-radius:50%;
+  background:#22c55e;display:flex;justify-content:center;align-items:center;
+  font-size:50px;
 }
 
-input{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
+/* APP */
+#app{display:none;padding:20px;max-width:500px;margin:auto}
+.header h3{font-size:20px}
+.header p{font-size:12px;opacity:0.7;margin-bottom:15px}
+
+.box{background:rgba(255,255,255,0.1);padding:15px;border-radius:10px}
+
+select,input:not(#user):not(#pass){
+  width:100%;padding:10px;margin:8px 0;border-radius:10px;border:none;
 }
 
-button{
-  width:100%;
-  padding:10px;
-  background:green;
-  color:white;
-  border:none;
+.quick{display:flex;gap:10px;margin-top:10px}
+.quick button{background:#334155}
+
+.card2{background:white;color:black;padding:10px;margin-top:10px;border-radius:10px}
+
+.tabs{display:flex;margin-top:10px;gap:5px}
+.tab-btn{flex:1;padding:8px;background:#475569;color:white;border:none;border-radius:8px}
+.tab-btn.active{background:white;color:black}
+
+.tab{display:none}
+.tab.active{display:block}
+
+footer{
+  position:fixed;bottom:0;width:100%;text-align:center;
+  font-size:12px;background:rgba(0,0,0,0.3);padding:10px;
 }
 
-#app{display:none;}
+.hidden{display:none}
+pre{white-space:pre-wrap}
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
 <div id="login">
-  <h2>Login</h2>
-  <input id="user" placeholder="Username">
-  <input id="pass" type="password" placeholder="Password">
-  <button onclick="login()">Masuk</button>
-  <div id="error"></div>
+  <div class="card">
+    <h2>🦷 Dental App</h2>
+    <input id="user" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
+    <button onclick="login()">Masuk</button>
+    <div id="error" style="color:red"></div>
+  </div>
 </div>
 
+<!-- SUCCESS -->
+<div id="success"><div class="check">✔</div></div>
+
+<!-- APP -->
 <div id="app">
-  <h2>✅ BERHASIL LOGIN</h2>
+
+<div class="header">
+<h3 id="greet">Halo 👋</h3>
+<p id="date"></p>
 </div>
+
+<div class="box">
+
+<label>Mode</label>
+<select id="mode" onchange="toggleBB()">
+<option value="dewasa">Dewasa</option>
+<option value="anak">Anak</option>
+</select>
+
+<input id="bb" class="hidden" placeholder="Berat badan (kg)">
+
+<label>Kategori</label>
+<select id="kategori" onchange="loadObat()">
+<option value="analgesik">Analgesik</option>
+<option value="antibiotik">Antibiotik</option>
+<option value="lain">Lain</option>
+</select>
+
+<label>Obat</label>
+<select id="obat"></select>
+
+<button onclick="run()">PROSES</button>
+
+<div class="quick">
+<button onclick="copyResep()">📋 Salin</button>
+<button onclick="resetForm()">🔄 Reset</button>
+</div>
+
+</div>
+
+<div id="out"></div>
+
+</div>
+
+<footer>© 2026 Dental App • DENTALE SPT</footer>
 
 <script>
 
+/* LOGIN */
 const users=[
 {username:"dokter",password:"dokter24"},
 {username:"admin",password:"klinik24"},
@@ -66,17 +138,142 @@ const users=[
 ];
 
 function login(){
-  const u = document.getElementById("user").value.trim();
-  const p = document.getElementById("pass").value.trim();
+  let u=user.value.trim();
+  let p=pass.value.trim();
 
-  const found = users.find(x => x.username === u && x.password === p);
+  let found=users.find(x=>x.username===u && x.password===p);
 
   if(found){
-    document.getElementById("login").style.display="none";
-    document.getElementById("app").style.display="block";
+    success.style.display="flex";
+    setTimeout(()=>{
+      success.style.display="none";
+      login.style.display="none";
+      app.style.display="block";
+      greet.innerText="Halo, "+u;
+      setDate();
+      loadObat();
+    },800);
   }else{
-    document.getElementById("error").innerText="Login gagal";
+    error.innerText="Username / Password salah";
   }
+}
+
+/* DATE */
+function setDate(){
+  date.innerText=new Date().toLocaleDateString("id-ID",
+  {weekday:"long",day:"numeric",month:"long",year:"numeric"});
+}
+
+/* TOGGLE */
+function toggleBB(){
+  bb.classList.toggle("hidden",mode.value!=="anak");
+}
+
+/* DATA OBAT */
+const data={
+analgesik:["Paracetamol","Ibuprofen","Mefenamic Acid","Diclofenac K","Ketorolac","Tramadol"],
+antibiotik:["Amoxicillin","Amoxiclav","Cefadroxil","Cefixime","Clindamycin","Metronidazole","Azithromycin"],
+lain:["Metylprednisolone","Omeprazole"]
+};
+
+function loadObat(){
+  obat.innerHTML="";
+  data[kategori.value].forEach(o=>{
+    let opt=document.createElement("option");
+    opt.text=o;
+    obat.add(opt);
+  });
+}
+
+/* RESEP */
+let current="";
+
+function run(){
+  let m=mode.value;
+  let b=parseFloat(bb.value||0);
+  let o=obat.value;
+
+  let dosis="",resep="",indikasi="",kontra="",merk="",kie="";
+
+  const dewasa={
+    "Paracetamol":["500 mg 3-4x","R/ Paracetamol 500 mg\nS: 3 dd 1","Nyeri","Hati","Sanmol","Boleh makan"],
+    "Ibuprofen":["400 mg 3x","R/ Ibuprofen 400 mg\nS: 3 dd 1 p.c","Inflamasi","Gastritis","Proris","Sesudah makan"],
+    "Mefenamic Acid":["500 mg 3x","R/ Mefenamic acid\nS: 3 dd 1","Nyeri","Gastritis","Ponstan","Jangan kosong"],
+    "Diclofenac K":["50 mg 2x","R/ Diclofenac\nS: 2 dd 1","Nyeri","Ulkus","Cataflam","Sesudah makan"],
+    "Ketorolac":["10 mg 3x","R/ Ketorolac\nS: 3 dd 1","Nyeri berat","Ginjal","Toradol","Max 5 hari"],
+    "Tramadol":["50 mg 2x","R/ Tramadol\nS: 2 dd 1","Nyeri berat","Adiksi","Tramal","Mengantuk"],
+
+    "Amoxicillin":["500 mg 3x","R/ Amoxicillin\nS: 3 dd 1","Infeksi","Alergi","Amoxil","Habiskan"],
+    "Amoxiclav":["625 mg 3x","R/ Amoxiclav\nS: 3 dd 1","Infeksi","Alergi","Augmentin","Sesudah makan"],
+    "Cefadroxil":["500 mg 2x","R/ Cefadroxil\nS: 2 dd 1","Infeksi","Alergi","Duricef","Habiskan"],
+    "Cefixime":["200 mg 2x","R/ Cefixime\nS: 2 dd 1","Infeksi","Alergi","Suprax","Habiskan"],
+    "Clindamycin":["300 mg 3x","R/ Clindamycin\nS: 3 dd 1","Infeksi","Diare","Dalacin","Stop jika diare"],
+    "Metronidazole":["500 mg 3x","R/ Metronidazole\nS: 3 dd 1","Anaerob","Alkohol","Flagyl","No alkohol"],
+    "Azithromycin":["500 mg 1x","R/ Azithromycin\nS: 1 dd 1","Infeksi","Hati","Zithromax","Sebelum makan"],
+
+    "Metylprednisolone":["4 mg 3x","R/ Metylprednisolone\nS: 3 dd 1","Inflamasi","Infeksi","Medrol","Jangka pendek"],
+    "Omeprazole":["20 mg 1x","R/ Omeprazole\nS: 1 dd 1","Gastritis","-","Losec","Sebelum makan"]
+  };
+
+  const maxBB=40;
+
+  const anak={
+    "Paracetamol":[(b*0.5)+" mL"],
+    "Ibuprofen":[(b*0.25)+" mL"],
+    "Amoxicillin":[(b*0.4)+" mL"],
+    "Cefadroxil":[(b*0.6)+" mL"],
+    "Metronidazole":[(b*0.3)+" mL"]
+  };
+
+  if(m==="dewasa" && dewasa[o]){
+    [dosis,resep,indikasi,kontra,merk,kie]=dewasa[o];
+  }else if(m==="anak" && anak[o]){
+    let w=b>maxBB?maxBB:b;
+    dosis=anak[o][0];
+    resep="R/ "+o+" syr\nS: "+dosis;
+    kie="Sesuai BB anak";
+  }else{
+    dosis="-";resep="-";
+  }
+
+  current=resep;
+
+  out.innerHTML=`
+  <div class="tabs">
+    <button class="tab-btn active" onclick="tab(event,'d')">Dosis</button>
+    <button class="tab-btn" onclick="tab(event,'r')">Resep</button>
+    <button class="tab-btn" onclick="tab(event,'k')">KIE</button>
+    <button class="tab-btn" onclick="tab(event,'i')">Info</button>
+  </div>
+
+  <div id="d" class="tab active"><div class="card2">${dosis}</div></div>
+  <div id="r" class="tab"><div class="card2"><pre>${resep}</pre></div></div>
+  <div id="k" class="tab"><div class="card2">${kie}</div></div>
+  <div id="i" class="tab">
+    <div class="card2">Indikasi: ${indikasi}</div>
+    <div class="card2">Kontra: ${kontra}</div>
+    <div class="card2">Merk: ${merk}</div>
+  </div>
+  `;
+}
+
+function tab(e,id){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  e.target.classList.add("active");
+}
+
+function copyResep(){
+  if(!current)return alert("Belum ada resep");
+  navigator.clipboard.writeText(current);
+  alert("Tersalin");
+}
+
+function resetForm(){
+  bb.value="";
+  out.innerHTML="";
+  current="";
 }
 
 </script>
