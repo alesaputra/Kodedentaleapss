@@ -32,6 +32,7 @@ body{
   border-radius:20px;
   width:300px;
   text-align:center;
+  color:black;
 }
 
 .login-input{
@@ -85,26 +86,35 @@ body{
 /* APP */
 .container{
   display:none;
-  padding:20px;
   max-width:520px;
   margin:auto;
+  padding:20px;
 }
 
 /* HEADER */
 .header{
-  background:rgba(255,255,255,0.1);
-  padding:15px;
-  border-radius:15px;
-  margin-bottom:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
 }
 
-.header h3{
+.header-text h3{
   font-size:18px;
 }
 
-.header p{
+.header-text p{
   font-size:12px;
   opacity:0.7;
+}
+
+.avatar{
+  width:40px;height:40px;
+  border-radius:50%;
+  background:#22c55e;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 /* FORM */
@@ -144,7 +154,7 @@ select,input:not(.login-input){
   color:white;
 }
 
-/* OUTPUT */
+/* RESULT */
 .card{
   background:white;
   color:black;
@@ -168,6 +178,7 @@ select,input:not(.login-input){
 .tab-content.active{display:block}
 
 .hidden{display:none}
+pre{white-space:pre-wrap}
 
 /* FOOTER */
 footer{
@@ -179,7 +190,6 @@ footer{
   font-size:12px;
   padding:10px;
   background:rgba(0,0,0,0.3);
-  backdrop-filter:blur(6px);
 }
 </style>
 </head>
@@ -206,8 +216,11 @@ footer{
 <div class="container" id="app">
 
 <div class="header">
-  <h3 id="greet">Halo Dokter 👋</h3>
-  <p id="date"></p>
+  <div class="header-text">
+    <h3 id="greeting">Halo, Dokter 👋</h3>
+    <p id="date"></p>
+  </div>
+  <div class="avatar" id="avatar">D</div>
 </div>
 
 <div class="form-box">
@@ -241,16 +254,16 @@ footer{
 </div>
 
 <footer>
-© <span id="year"></span> Dental App • Developed by DENTALE SPT
+© 2026 Dental App • Developed by DENTALE SPT
 </footer>
 
 <script>
 
 /* LOGIN */
 const users=[
-{username:"dokter",password:"dokter24"},
-{username:"admin",password:"klinik24"},
-{username:"asisten",password:"babu24"}
+{username:"dokter",password:"dokter24",name:"Dokter"},
+{username:"admin",password:"klinik24",name:"Admin"},
+{username:"asisten",password:"babu24",name:"Asisten"}
 ];
 
 function login(){
@@ -266,7 +279,12 @@ function login(){
       success.style.display="none";
       login.style.display="none";
       app.style.display="block";
-      initApp();
+
+      greeting.innerText="Halo, "+found.name+" 👋";
+      avatar.innerText=found.name.charAt(0);
+
+      setDate();
+      loadObat();
     },800);
 
   }else{
@@ -274,22 +292,17 @@ function login(){
   }
 }
 
-/* INIT */
-function initApp(){
-  setDate();
-  loadObat();
-}
-
 /* DATE */
 function setDate(){
   let d=new Date();
-  date.innerText=d.toDateString();
-  year.innerText=d.getFullYear();
+  date.innerText=d.toLocaleDateString('id-ID',{
+    weekday:'long',day:'numeric',month:'long',year:'numeric'
+  });
 }
 
 /* FORM */
 function toggleBB(){
-  bb.classList.toggle("hidden", mode.value!=="anak");
+  mode.value==="anak"?bb.classList.remove("hidden"):bb.classList.add("hidden");
 }
 
 const data={
@@ -307,27 +320,29 @@ function loadObat(){
   });
 }
 
-/* LOGIC */
 let currentResep="";
 
+/* PROCESS */
 function run(){
   let o=obat.value;
-  let m=mode.value;
   let b=parseFloat(bb.value||0);
 
-  let resep="-",dosis="-";
+  let dosis="-",resep="-";
 
   const dewasa={
-    "Paracetamol":["500 mg 3x","R/ Paracetamol\nS: 3 dd 1"],
-    "Ibuprofen":["400 mg 3x","R/ Ibuprofen\nS: 3 dd 1"],
-    "Amoxicillin":["500 mg 3x","R/ Amoxicillin\nS: 3 dd 1"]
+    "Paracetamol":["500 mg 3x","R/ Paracetamol\nS:3 dd 1"],
+    "Ibuprofen":["400 mg 3x","R/ Ibuprofen\nS:3 dd 1"]
   };
 
-  if(m==="dewasa" && dewasa[o]){
+  const anak={
+    "Paracetamol":[(b*0.5).toFixed(1)+" mL","R/ Paracetamol syr"],
+    "Ibuprofen":[(b*0.25).toFixed(1)+" mL","R/ Ibuprofen syr"]
+  };
+
+  if(mode.value==="dewasa" && dewasa[o]){
     [dosis,resep]=dewasa[o];
-  }else if(m==="anak" && b>0){
-    dosis=(b*0.5).toFixed(1)+" mL";
-    resep="R/ "+o+"\nS: sesuai BB";
+  }else if(mode.value==="anak" && anak[o]){
+    [dosis,resep]=anak[o];
   }
 
   currentResep=resep;
@@ -338,9 +353,9 @@ function run(){
   `;
 }
 
-/* ACTION */
+/* UTIL */
 function copyResep(){
-  if(!currentResep)return alert("Belum ada resep");
+  if(!currentResep) return alert("Belum ada resep");
   navigator.clipboard.writeText(currentResep);
   alert("Tersalin!");
 }
