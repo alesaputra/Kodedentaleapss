@@ -3,6 +3,7 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dental App</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
@@ -31,7 +32,6 @@ body{
   border-radius:20px;
   width:300px;
   text-align:center;
-  color:black;
 }
 
 .login-input{
@@ -63,6 +63,7 @@ body{
   display:none;
   justify-content:center;
   align-items:center;
+  z-index:9999;
 }
 
 .check{
@@ -84,26 +85,29 @@ body{
 /* APP */
 .container{
   display:none;
+  padding:20px;
   max-width:520px;
   margin:auto;
-  padding:20px;
 }
 
 /* HEADER */
 .header{
-  margin-bottom:20px;
+  background:rgba(255,255,255,0.1);
+  padding:15px;
+  border-radius:15px;
+  margin-bottom:15px;
 }
 
 .header h3{
-  font-size:20px;
+  font-size:18px;
 }
 
 .header p{
   font-size:12px;
-  opacity:0.8;
+  opacity:0.7;
 }
 
-/* BOX */
+/* FORM */
 .form-box{
   background:rgba(255,255,255,0.12);
   padding:20px;
@@ -140,7 +144,7 @@ select,input:not(.login-input){
   color:white;
 }
 
-/* RESULT */
+/* OUTPUT */
 .card{
   background:white;
   color:black;
@@ -169,11 +173,13 @@ select,input:not(.login-input){
 footer{
   position:fixed;
   bottom:0;
+  left:0;
   width:100%;
   text-align:center;
   font-size:12px;
   padding:10px;
   background:rgba(0,0,0,0.3);
+  backdrop-filter:blur(6px);
 }
 </style>
 </head>
@@ -187,7 +193,7 @@ footer{
     <input id="user" class="login-input" placeholder="Username">
     <input id="pass" type="password" class="login-input" placeholder="Password">
     <button class="btn" onclick="login()">Masuk</button>
-    <div id="error" style="color:red;"></div>
+    <div id="error" style="color:red;margin-top:5px;"></div>
   </div>
 </div>
 
@@ -200,7 +206,7 @@ footer{
 <div class="container" id="app">
 
 <div class="header">
-  <h3 id="greet">Halo 👋</h3>
+  <h3 id="greet">Halo Dokter 👋</h3>
   <p id="date"></p>
 </div>
 
@@ -234,15 +240,17 @@ footer{
 
 </div>
 
-<footer>© 2026 Dental App • DENTALE SPT</footer>
+<footer>
+© <span id="year"></span> Dental App • Developed by DENTALE SPT
+</footer>
 
 <script>
 
-/* USER */
+/* LOGIN */
 const users=[
-{username:"dokter",password:"dokter24",name:"Dokter"},
-{username:"admin",password:"klinik24",name:"Admin"},
-{username:"asisten",password:"babu24",name:"Asisten"}
+{username:"dokter",password:"dokter24"},
+{username:"admin",password:"klinik24"},
+{username:"asisten",password:"babu24"}
 ];
 
 function login(){
@@ -258,35 +266,41 @@ function login(){
       success.style.display="none";
       login.style.display="none";
       app.style.display="block";
-
-      greet.innerText="Halo, "+found.name+" 👋";
-      setDate();
-      loadObat();
-
+      initApp();
     },800);
 
   }else{
-    error.innerText="Login salah";
+    error.innerText="Username / Password salah";
   }
+}
+
+/* INIT */
+function initApp(){
+  setDate();
+  loadObat();
 }
 
 /* DATE */
 function setDate(){
   let d=new Date();
-  date.innerText=d.toLocaleDateString("id-ID",{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  date.innerText=d.toDateString();
+  year.innerText=d.getFullYear();
 }
 
-/* OBAT */
+/* FORM */
+function toggleBB(){
+  bb.classList.toggle("hidden", mode.value!=="anak");
+}
+
 const data={
-analgesik:["Paracetamol","Ibuprofen","Mefenamic Acid"],
-antibiotik:["Amoxicillin","Cefadroxil"],
-lain:["Omeprazole"]
+analgesik:["Paracetamol","Ibuprofen","Mefenamic Acid","Diclofenac K","Ketorolac","Tramadol"],
+antibiotik:["Amoxicillin","Amoxiclav","Cefadroxil","Cefixime","Clindamycin","Metronidazole","Azithromycin"],
+lain:["Metylprednisolone","Omeprazole"]
 };
 
 function loadObat(){
-  let k=kategori.value;
   obat.innerHTML="";
-  data[k].forEach(o=>{
+  data[kategori.value].forEach(o=>{
     let opt=document.createElement("option");
     opt.text=o;
     obat.add(opt);
@@ -298,23 +312,43 @@ let currentResep="";
 
 function run(){
   let o=obat.value;
+  let m=mode.value;
+  let b=parseFloat(bb.value||0);
 
-  let resep="R/ "+o+"\nS: 3 dd 1";
+  let resep="-",dosis="-";
+
+  const dewasa={
+    "Paracetamol":["500 mg 3x","R/ Paracetamol\nS: 3 dd 1"],
+    "Ibuprofen":["400 mg 3x","R/ Ibuprofen\nS: 3 dd 1"],
+    "Amoxicillin":["500 mg 3x","R/ Amoxicillin\nS: 3 dd 1"]
+  };
+
+  if(m==="dewasa" && dewasa[o]){
+    [dosis,resep]=dewasa[o];
+  }else if(m==="anak" && b>0){
+    dosis=(b*0.5).toFixed(1)+" mL";
+    resep="R/ "+o+"\nS: sesuai BB";
+  }
 
   currentResep=resep;
 
   out.innerHTML=`
+  <div class="card"><b>Dosis:</b><br>${dosis}</div>
   <div class="card"><pre>${resep}</pre></div>
   `;
 }
 
+/* ACTION */
 function copyResep(){
+  if(!currentResep)return alert("Belum ada resep");
   navigator.clipboard.writeText(currentResep);
   alert("Tersalin!");
 }
 
 function resetForm(){
+  bb.value="";
   out.innerHTML="";
+  currentResep="";
 }
 
 </script>
