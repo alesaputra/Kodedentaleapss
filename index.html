@@ -21,7 +21,6 @@
       padding: 25px;
       border-radius: 12px;
       width: 350px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
     }
 
     input {
@@ -41,10 +40,14 @@
       color: white;
       font-weight: bold;
       cursor: pointer;
+      margin-top: 10px;
     }
 
-    button:hover {
-      background: #0096c7;
+    .link {
+      margin-top: 10px;
+      cursor: pointer;
+      text-align: center;
+      color: #ccc;
     }
 
     .hidden {
@@ -65,9 +68,19 @@
 <!-- LOGIN -->
 <div id="loginBox" class="card">
   <h2>Login</h2>
-  <input id="user" placeholder="Username">
-  <input id="pass" type="password" placeholder="Password">
+  <input id="loginEmail" placeholder="Email">
+  <input id="loginPassword" type="password" placeholder="Password">
   <button onclick="login()">Login</button>
+  <div class="link" onclick="showRegister()">Belum punya akun? Register</div>
+</div>
+
+<!-- REGISTER -->
+<div id="registerBox" class="card hidden">
+  <h2>Register</h2>
+  <input id="regEmail" placeholder="Email">
+  <input id="regPassword" type="password" placeholder="Password">
+  <button onclick="register()">Register</button>
+  <div class="link" onclick="showLogin()">Sudah punya akun? Login</div>
 </div>
 
 <!-- APP -->
@@ -87,22 +100,77 @@ const supabase = window.supabase.createClient(
   SUPABASE_KEY
 );
 
-// ================= LOGIN =================
-function login() {
-  let u = document.getElementById("user").value;
-  let p = document.getElementById("pass").value;
+// ================= UI SWITCH =================
+function showRegister(){
+  document.getElementById("loginBox").classList.add("hidden");
+  document.getElementById("registerBox").classList.remove("hidden");
+}
 
-  if(u === "admin" && p === "123"){
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("appBox").classList.remove("hidden");
+function showLogin(){
+  document.getElementById("registerBox").classList.add("hidden");
+  document.getElementById("loginBox").classList.remove("hidden");
+}
+
+// ================= REGISTER =================
+async function register(){
+  const email = document.getElementById("regEmail").value;
+  const password = document.getElementById("regPassword").value;
+
+  const { data, error } = await supabase.auth.signUp({
+    email: email,
+    password: password
+  });
+
+  if(error){
+    alert("Register gagal: " + error.message);
+    return;
+  }
+
+  alert("Register berhasil! Silakan login");
+  showLogin();
+}
+
+// ================= LOGIN =================
+async function login(){
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if(error){
+    alert("Login gagal: " + error.message);
+    return;
+  }
+
+  showApp();
+  loadData();
+}
+
+// ================= AUTO LOGIN =================
+async function checkUser(){
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if(session){
+    showApp();
     loadData();
-  } else {
-    alert("Login salah!");
   }
 }
 
+checkUser();
+
+// ================= SHOW APP =================
+function showApp(){
+  document.getElementById("loginBox").classList.add("hidden");
+  document.getElementById("registerBox").classList.add("hidden");
+  document.getElementById("appBox").classList.remove("hidden");
+}
+
 // ================= LOGOUT =================
-function logout(){
+async function logout(){
+  await supabase.auth.signOut();
   location.reload();
 }
 
@@ -113,7 +181,7 @@ async function loadData(){
     .select("*");
 
   if(error){
-    alert("Error ambil data");
+    alert("Gagal ambil data");
     console.log(error);
     return;
   }
@@ -124,13 +192,11 @@ async function loadData(){
     html += `
       <div class="obat-item">
         <b>${o.nama}</b><br>
-        Kategori: ${o.kategori}<br>
-        Dosis Dewasa: ${o.dosis_dewasa}<br>
-        Dosis Anak: ${o.dosis_anak}<br>
+        ${o.kategori}<br>
+        Dewasa: ${o.dosis_dewasa}<br>
+        Anak: ${o.dosis_anak}<br>
         Indikasi: ${o.indikasi}<br>
-        Kontra: ${o.kontraindikasi}<br>
-        Merk: ${o.merk}<br>
-        Keterangan: ${o.kie}
+        Merk: ${o.merk}
       </div>
     `;
   });
