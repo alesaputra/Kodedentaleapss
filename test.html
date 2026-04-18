@@ -1,89 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Dental App Login</title>
+  <meta charset="UTF-8">
+  <title>Dental App</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #4e73df, #1cc88a);
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .card {
-      background: white;
-      padding: 30px;
-      width: 320px;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      background: #4e73df;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    button:hover {
-      background: #2e59d9;
-    }
-
-    .switch {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 14px;
-      color: #666;
-      cursor: pointer;
-    }
-
-    #status {
-      margin-top: 10px;
-      text-align: center;
-      font-size: 14px;
-    }
-  </style>
 </head>
 
-<body>
+<body class="bg-gradient-to-br from-blue-600 to-teal-500 min-h-screen flex items-center justify-center">
 
-<div class="card">
+<div class="bg-white rounded-2xl shadow-2xl flex w-[800px] overflow-hidden">
 
-  <h2 id="title">Login</h2>
-
-  <input id="username" placeholder="Username">
-  <input id="password" type="password" placeholder="Password">
-
-  <button onclick="submit()">Login</button>
-
-  <div class="switch" onclick="toggle()">
-    Belum punya akun? Register
+  <!-- LEFT SIDE -->
+  <div class="w-1/2 bg-blue-600 text-white p-10 flex flex-col justify-center">
+    <h1 class="text-3xl font-bold mb-4">Dental Clinic</h1>
+    <p class="text-sm opacity-90">
+      Sistem manajemen klinik gigi modern untuk membantu pelayanan pasien lebih cepat dan efisien.
+    </p>
   </div>
 
-  <div id="status"></div>
+  <!-- RIGHT SIDE -->
+  <div class="w-1/2 p-10">
+
+    <h2 id="title" class="text-2xl font-bold mb-6 text-gray-700">Login</h2>
+
+    <div class="space-y-4">
+      <input id="username"
+        class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+        placeholder="Username">
+
+      <input id="password" type="password"
+        class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+        placeholder="Password">
+
+      <button onclick="submit()"
+        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
+        Login
+      </button>
+    </div>
+
+    <p onclick="toggle()" id="switch"
+      class="text-sm text-center mt-4 text-gray-500 cursor-pointer">
+      Belum punya akun? Register
+    </p>
+
+    <p id="status" class="text-center text-sm mt-3 text-red-500"></p>
+
+  </div>
 
 </div>
 
@@ -100,7 +67,7 @@ function toggle() {
 
   document.getElementById("title").innerText = isLogin ? "Login" : "Register";
   document.querySelector("button").innerText = isLogin ? "Login" : "Register";
-  document.querySelector(".switch").innerText = isLogin
+  document.getElementById("switch").innerText = isLogin
     ? "Belum punya akun? Register"
     : "Sudah punya akun? Login";
 
@@ -113,7 +80,7 @@ async function submit() {
   const email = user + "@app.com";
 
   if (!user || !pass) {
-    status("Isi semua field!");
+    setStatus("Isi semua field!");
     return;
   }
 
@@ -123,12 +90,12 @@ async function submit() {
       password: pass
     });
 
-    status(error ? error.message : "Login berhasil!");
-
-    if (!error) {
-      // contoh redirect
+    if (error) {
+      setStatus(error.message);
+    } else {
+      setStatus("Login berhasil!", true);
       setTimeout(() => {
-        alert("Masuk ke dashboard (next step)");
+        alert("Next: masuk dashboard");
       }, 500);
     }
 
@@ -138,12 +105,14 @@ async function submit() {
       password: pass
     });
 
-    status(error ? error.message : "Register berhasil!");
+    setStatus(error ? error.message : "Register berhasil!", !error);
   }
 }
 
-function status(msg) {
-  document.getElementById("status").innerText = msg;
+function setStatus(msg, success = false) {
+  const el = document.getElementById("status");
+  el.innerText = msg;
+  el.className = "text-center text-sm mt-3 " + (success ? "text-green-500" : "text-red-500");
 }
 </script>
 
