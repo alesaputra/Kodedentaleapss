@@ -1,26 +1,56 @@
-<script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FINAL FIX</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
 
-const client = createClient(
+<body>
+
+<h2>Register</h2>
+<input id="ruser"><br>
+<input id="rpass" type="password"><br>
+<button onclick="register()">Register</button>
+
+<h2>Login</h2>
+<input id="luser"><br>
+<input id="lpass" type="password"><br>
+<button onclick="login()">Login</button>
+
+<div id="status"></div>
+
+<script>
+const client = window.supabase.createClient(
   "https://bhtlwacoyjnyotsjtqrp.supabase.co",
   "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ"
-)
+);
 
-window.client = client
+async function register() {
+  const email = document.getElementById("ruser").value + "@app.com";
+  const pass = document.getElementById("rpass").value;
 
-window.register = async function(){
-  const email = document.getElementById("ruser").value + "@app.com"
-  const pass = document.getElementById("rpass").value
+  const { error } = await client.auth.signUp({
+    email: email,
+    password: pass
+  });
 
-  const { error } = await client.auth.signUp({ email, password: pass })
-  document.getElementById("status").innerText = error ? error.message : "REGISTER OK"
+  document.getElementById("status").innerText =
+    error ? error.message : "REGISTER OK";
 }
 
-window.login = async function(){
-  const email = document.getElementById("luser").value + "@app.com"
-  const pass = document.getElementById("lpass").value
+async function login() {
+  const email = document.getElementById("luser").value + "@app.com";
+  const pass = document.getElementById("lpass").value;
 
-  const { error } = await client.auth.signInWithPassword({ email, password: pass })
-  document.getElementById("status").innerText = error ? error.message : "LOGIN OK"
+  const { error } = await client.auth.signInWithPassword({
+    email: email,
+    password: pass
+  });
+
+  document.getElementById("status").innerText =
+    error ? error.message : "LOGIN OK";
 }
 </script>
+
+</body>
+</html>
