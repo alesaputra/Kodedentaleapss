@@ -1,56 +1,55 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dental App</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:Arial;
-  min-height:100vh;
-  background:linear-gradient(135deg,#0f172a,#1e3a8a);
-  display:flex;align-items:center;justify-content:center;
+body {
+  font-family: Arial;
+  background: linear-gradient(135deg,#0f172a,#1e3a8a);
   color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
 
-.glass{
-  backdrop-filter:blur(15px);
-  background:rgba(255,255,255,0.1);
+.box {
+  backdrop-filter: blur(15px);
+  background: rgba(255,255,255,0.1);
   padding:25px;
-  border-radius:20px;
-  width:350px;
-  box-shadow:0 0 20px rgba(0,0,0,0.3);
+  border-radius:15px;
+  width:320px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
 }
 
-input,select,button{
+input, select, button {
   width:100%;
   padding:10px;
   margin-top:10px;
   border:none;
-  border-radius:10px;
+  border-radius:8px;
 }
 
-button{
+button {
   background:#38bdf8;
   color:white;
   cursor:pointer;
-  font-weight:bold;
 }
 
-button:hover{background:#0ea5e9}
-
-.hidden{display:none}
+.hidden {
+  display:none;
+}
 </style>
 </head>
 
 <body>
 
 <!-- LOGIN -->
-<div id="loginBox" class="glass">
+<div class="box" id="loginBox">
   <h2>Login</h2>
   <input id="user" placeholder="Username">
   <input id="pass" type="password" placeholder="Password">
@@ -58,30 +57,18 @@ button:hover{background:#0ea5e9}
 </div>
 
 <!-- APP -->
-<div id="appBox" class="glass hidden">
-  <h2>Dental App</h2>
+<div class="box hidden" id="appBox">
+  <h2>Resep Obat</h2>
 
-  <label>Kategori</label>
   <select id="kategori" onchange="loadObat()">
+    <option value="">-- Pilih Kategori --</option>
     <option value="analgesik">Analgesik</option>
     <option value="antibiotik">Antibiotik</option>
   </select>
 
-  <label>Obat</label>
-  <select id="obat"></select>
+  <select id="obatSelect" onchange="showDetail()"></select>
 
-  <label>Berat Badan (kg)</label>
-  <input id="bb" type="number">
-
-  <label>Mode</label>
-  <select id="mode">
-    <option value="dewasa">Dewasa</option>
-    <option value="anak">Anak</option>
-  </select>
-
-  <button onclick="hitung()">Hitung</button>
-
-  <pre id="hasil"></pre>
+  <div id="detail"></div>
 
   <button onclick="logout()">Logout</button>
 </div>
@@ -98,13 +85,12 @@ const supabase = window.supabase.createClient(
 
 // ================= LOGIN =================
 function login(){
-  let u = document.getElementById("user").value;
-  let p = document.getElementById("pass").value;
+  let u = document.getElementById("user").value.trim();
+  let p = document.getElementById("pass").value.trim();
 
-  if(u==="admin" && p==="123"){
+  if(u === "admin" && p === "123"){
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("appBox").classList.remove("hidden");
-    loadObat();
   } else {
     alert("Login salah");
   }
@@ -117,50 +103,44 @@ function logout(){
 // ================= LOAD OBAT =================
 async function loadObat(){
   let kategori = document.getElementById("kategori").value;
-  let select = document.getElementById("obat");
-
-  select.innerHTML = "<option>Loading...</option>";
 
   let { data, error } = await supabase
     .from("obat")
     .select("*")
     .eq("kategori", kategori);
 
-  if(error){
-    alert("Gagal ambil data");
-    console.log(error);
+  console.log(data);
+
+  let select = document.getElementById("obatSelect");
+  select.innerHTML = "";
+
+  if(!data || data.length === 0){
+    select.innerHTML = "<option>Tidak ada data</option>";
     return;
   }
 
-  select.innerHTML = "";
-
   data.forEach(o=>{
-    let opt = document.createElement("option");
-    opt.value = JSON.stringify(o);
-    opt.text = o.nama;
-    select.add(opt);
+    select.innerHTML += `<option value="${o.id}">${o.nama}</option>`;
   });
+
+  window.dataObat = data;
 }
 
-// ================= HITUNG =================
-function hitung(){
-  let bb = document.getElementById("bb").value;
-  let mode = document.getElementById("mode").value;
-  let obat = JSON.parse(document.getElementById("obat").value);
+// ================= DETAIL =================
+function showDetail(){
+  let id = document.getElementById("obatSelect").value;
 
-  let dosis = mode==="dewasa" ? obat.dosis_dewasa : obat.dosis_anak;
+  let o = window.dataObat.find(x=>x.id == id);
 
-  let hasil = `
-R/ ${obat.nama}
-S: ${dosis}
-
-Indikasi: ${obat.indikasi}
-Kontraindikasi: ${obat.kontraindikasi}
-Merk: ${obat.merk}
-KIE: ${obat.kie}
-`;
-
-  document.getElementById("hasil").innerText = hasil;
+  document.getElementById("detail").innerHTML = `
+    <p><b>Nama:</b> ${o.nama}</p>
+    <p><b>Dosis Dewasa:</b> ${o.dosis_dewasa}</p>
+    <p><b>Dosis Anak:</b> ${o.dosis_anak}</p>
+    <p><b>Indikasi:</b> ${o.indikasi}</p>
+    <p><b>Kontra:</b> ${o.kontraindikasi}</p>
+    <p><b>Merk:</b> ${o.merk}</p>
+    <p><b>KIE:</b> ${o.kie}</p>
+  `;
 }
 </script>
 
