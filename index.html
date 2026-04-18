@@ -2,100 +2,170 @@
 <html>
 <head>
   <title>Dental App</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-</head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: Arial;
+      background: #2f4a7c;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
+    .box {
+      background: #3d5a99;
+      padding: 30px;
+      border-radius: 10px;
+      width: 300px;
+    }
+
+    input {
+      width: 100%;
+      margin: 5px 0;
+      padding: 8px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: #00bcd4;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
 <body>
 
-<h2>Login (Username)</h2>
-<input id="loginUsername" placeholder="Username">
-<input id="loginPassword" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
+<div class="box" id="loginBox">
+  <h2>Login</h2>
+  <input id="loginUsername" placeholder="Username">
+  <input id="loginPassword" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
 
-<h2>Register</h2>
-<input id="regUsername" placeholder="Username">
-<input id="regEmail" placeholder="Email">
-<input id="regPassword" type="password" placeholder="Password">
-<button onclick="register()">Register</button>
+  <p>Belum punya akun? <a href="#" onclick="showRegister()">Register</a></p>
+</div>
 
-<div id="data"></div>
+<div class="box hidden" id="registerBox">
+  <h2>Register</h2>
+  <input id="regUsername" placeholder="Username">
+  <input id="regEmail" placeholder="Email">
+  <input id="regPassword" type="password" placeholder="Password">
+  <button onclick="register()">Register</button>
+
+  <p><a href="#" onclick="showLogin()">Kembali ke Login</a></p>
+</div>
+
+<div class="box hidden" id="appBox">
+  <h2>Data Obat</h2>
+  <div id="dataObat"></div>
+  <button onclick="logout()">Logout</button>
+</div>
 
 <script>
-const SUPABASE_URL = "https://bhtlwacoyjnyotsjtqrp.supabase.co";
-const SUPABASE_KEY = "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ";
+  // 🔥 CONFIG (PASTIKAN HANYA SEKALI!)
+  const SUPABASE_URL = "https://bhtlwacoyjnyotsjtqrp.supabase.co";
+  const SUPABASE_KEY = "ISI_DENGAN_KEY_KAMU"; // <-- ganti
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// REGISTER
-async function register(){
-  const username = document.getElementById("regUsername").value;
-  const email = document.getElementById("regEmail").value;
-  const password = document.getElementById("regPassword").value;
+  // ================= LOGIN =================
+  async function login() {
+    const username = document.getElementById("loginUsername").value;
+    const password = document.getElementById("loginPassword").value;
 
-  // 1. register ke auth
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password
-  });
+    const email = username + "@app.com"; // trik username
 
-  if(error){
-    alert(error.message);
-    return;
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      alert("Login gagal: " + error.message);
+    } else {
+      showApp();
+    }
   }
 
-  // 2. simpan username
-  const userId = data.user.id;
+  // ================= REGISTER =================
+  async function register() {
+    const username = document.getElementById("regUsername").value;
+    const emailInput = document.getElementById("regEmail").value;
+    const password = document.getElementById("regPassword").value;
 
-  await supabase.from("users").insert({
-    id: userId,
-    username: username
-  });
+    const email = username + "@app.com";
 
-  alert("Register berhasil!");
-}
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          username: username,
+          real_email: emailInput
+        }
+      }
+    });
 
-// LOGIN USERNAME
-async function login(){
-  const username = document.getElementById("loginUsername").value;
-  const password = document.getElementById("loginPassword").value;
-
-  // 1. cari email dari username
-  const { data: userData, error } = await supabase
-    .from("users")
-    .select("*")
-    .eq("username", username)
-    .single();
-
-  if(error || !userData){
-    alert("Username tidak ditemukan");
-    return;
+    if (error) {
+      alert("Register gagal: " + error.message);
+    } else {
+      alert("Register berhasil! Silakan login");
+      showLogin();
+    }
   }
 
-  // 2. login pakai email
-  const { error: loginError } = await supabase.auth.signInWithPassword({
-    email: userData.email,
-    password: password
-  });
-
-  if(loginError){
-    alert("Password salah");
-    return;
+  // ================= UI =================
+  function showRegister() {
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("registerBox").classList.remove("hidden");
   }
 
-  loadData();
-}
+  function showLogin() {
+    document.getElementById("registerBox").classList.add("hidden");
+    document.getElementById("loginBox").classList.remove("hidden");
+  }
 
-// LOAD DATA
-async function loadData(){
-  const { data } = await supabase.from("obat").select("*");
+  function showApp() {
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("registerBox").classList.add("hidden");
+    document.getElementById("appBox").classList.remove("hidden");
 
-  let html = "";
-  data.forEach(o => {
-    html += `<p>${o.nama} - ${o.dosis_dewasa}</p>`;
-  });
+    loadObat();
+  }
 
-  document.getElementById("data").innerHTML = html;
-}
+  function logout() {
+    location.reload();
+  }
+
+  // ================= DATA OBAT =================
+  function loadObat() {
+    const data = [
+      "Paracetamol - 500 mg 3x",
+      "Ibuprofen - 400 mg 3x",
+      "Amoxicillin - 500 mg 3x",
+      "Cefadroxil - 500 mg 2x",
+      "Metronidazole - 500 mg 3x",
+      "Asam Mefenamat - 500 mg 3x",
+      "Dexamethasone - 0.5 mg 2x",
+      "Clindamycin - 300 mg 3x",
+      "Ketorolac - 10 mg 3x"
+    ];
+
+    let html = "";
+    data.forEach(item => {
+      html += "<p>" + item + "</p>";
+    });
+
+    document.getElementById("dataObat").innerHTML = html;
+  }
 </script>
 
 </body>
