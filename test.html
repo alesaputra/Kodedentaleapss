@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TEST FIX</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<h2>Register</h2>
+<input id="ruser"><br>
+<input id="rpass" type="password"><br>
+<button onclick="register()">Register</button>
+
+<h2>Login</h2>
+<input id="luser"><br>
+<input id="lpass" type="password"><br>
+<button onclick="login()">Login</button>
+
+<div id="status"></div>
+
+<script>
+const supabase = window.supabase.createClient(
+  "https://bhtlwacoyjnyotsjtqrp.supabase.co",
+  "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ"
+);
+
+function status(msg){
+  document.getElementById("status").innerText = msg;
+}
+
+async function register(){
+  const email = document.getElementById("ruser").value + "@app.com";
+  const pass = document.getElementById("rpass").value;
+
+  const { error } = await supabase.auth.signUp({ email, password: pass });
+
+  status(error ? error.message : "REGISTER OK");
+}
+
+async function login(){
+  const email = document.getElementById("luser").value + "@app.com";
+  const pass = document.getElementById("lpass").value;
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+
+  status(error ? error.message : "LOGIN OK");
+}
+</script>
+
+</body>
+</html>
