@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dashboard</title>
+  <title>Dental Dashboard</title>
 
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
@@ -15,43 +18,118 @@
   <div class="w-64 bg-blue-700 text-white p-5">
     <h2 class="text-xl font-bold mb-6">Dental App</h2>
 
-    <ul>
-      <li class="mb-2">Dashboard</li>
-      <li class="mb-2">Pasien</li>
-      <li onclick="logout()" class="text-red-300 mt-10 cursor-pointer">Logout</li>
+    <ul class="space-y-3">
+      <li onclick="show('dashboard')" class="cursor-pointer hover:underline">Dashboard</li>
+      <li onclick="show('resep')" class="cursor-pointer hover:underline">Resep Obat</li>
+      <li onclick="logout()" class="cursor-pointer text-red-300 mt-10">Logout</li>
     </ul>
   </div>
 
   <!-- CONTENT -->
-  <div class="flex-1 p-6">
-    <h1 class="text-2xl font-bold">Dashboard</h1>
-    <p>Selamat datang 👋</p>
-  </div>
+  <div class="flex-1 p-6 overflow-auto">
 
+    <!-- DASHBOARD -->
+    <div id="dashboard">
+      <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
+      <p>Selamat datang di sistem klinik gigi.</p>
+    </div>
+
+    <!-- RESEP -->
+    <div id="resep" class="hidden">
+      <h1 class="text-2xl font-bold mb-4">Resep Obat</h1>
+
+      <input id="pasien" placeholder="Nama Pasien" class="border p-2 mb-2 w-full rounded">
+      <input id="obat" placeholder="Nama Obat" class="border p-2 mb-2 w-full rounded">
+      <input id="dosis" placeholder="Dosis" class="border p-2 mb-2 w-full rounded">
+
+      <button onclick="tambahResep()" class="bg-blue-600 text-white p-2 rounded w-full">
+        Simpan Resep
+      </button>
+
+      <div id="listResep" class="mt-4"></div>
+    </div>
+
+  </div>
 </div>
 
 <script>
+// 🔗 SUPABASE CONFIG (PASTIKAN SAMA)
 const client = window.supabase.createClient(
   "https://bhtlwacoyjnyotsjtqrp.supabase.co",
   "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ"
 );
 
-// CEK LOGIN
-async function checkUser() {
-  const { data } = await client.auth.getUser();
+// 🔁 NAVIGASI
+function show(page) {
+  document.getElementById("dashboard").classList.add("hidden");
+  document.getElementById("resep").classList.add("hidden");
 
-  if (!data.user) {
-    alert("Silakan login dulu!");
-    window.location.href = "index.html";
+  document.getElementById(page).classList.remove("hidden");
+
+  if (page === "resep") loadResep();
+}
+
+// ➕ TAMBAH RESEP
+async function tambahResep() {
+  const pasien = document.getElementById("pasien").value;
+  const obat = document.getElementById("obat").value;
+  const dosis = document.getElementById("dosis").value;
+
+  if (!pasien || !obat || !dosis) {
+    alert("Isi semua field!");
+    return;
+  }
+
+  const { error } = await client.from("resep").insert([
+    { pasien, obat, dosis }
+  ]);
+
+  if (error) {
+    alert("Gagal: " + error.message);
+  } else {
+    alert("Berhasil disimpan!");
+    document.getElementById("pasien").value = "";
+    document.getElementById("obat").value = "";
+    document.getElementById("dosis").value = "";
+
+    loadResep();
   }
 }
-checkUser();
 
-// LOGOUT
-async function logout() {
-  await client.auth.signOut();
+// 📥 LOAD DATA
+async function loadResep() {
+  const { data, error } = await client
+    .from("resep")
+    .select("*")
+    .order("id", { ascending: false });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  let html = "";
+
+  data.forEach(r => {
+    html += `
+      <div class="bg-white p-3 mb-2 rounded shadow">
+        <b>${r.pasien}</b><br>
+        ${r.obat} - ${r.dosis}
+      </div>
+    `;
+  });
+
+  document.getElementById("listResep").innerHTML = html;
+}
+
+// 🚪 LOGOUT
+function logout() {
   window.location.href = "index.html";
 }
+
+// LOAD AWAL
+loadResep();
+
 </script>
 
 </body>
