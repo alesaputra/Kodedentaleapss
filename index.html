@@ -1,71 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dental App Login</title>
+  <title>Login</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body>
+<body class="bg-blue-500 flex items-center justify-center h-screen">
 
-<h2>Register</h2>
-<input id="ruser" placeholder="username"><br>
-<input id="rpass" type="password" placeholder="password"><br>
-<button onclick="register()">Register</button>
+<div class="bg-white p-8 rounded-xl shadow w-80">
 
-<hr>
+  <h2 class="text-xl font-bold mb-4 text-center">Login</h2>
 
-<h2>Login</h2>
-<input id="luser" placeholder="username"><br>
-<input id="lpass" type="password" placeholder="password"><br>
-<button onclick="login()">Login</button>
+  <input id="user" placeholder="Username"
+    class="w-full border p-2 mb-3 rounded">
 
-<hr>
+  <input id="pass" type="password" placeholder="Password"
+    class="w-full border p-2 mb-3 rounded">
 
-<div id="status"></div>
+  <button onclick="login()"
+    class="w-full bg-blue-600 text-white p-2 rounded">
+    Login
+  </button>
+
+  <p id="status" class="text-center text-red-500 mt-3 text-sm"></p>
+
+</div>
 
 <script>
-const supabase = window.supabase.createClient(
+const client = window.supabase.createClient(
   "https://bhtlwacoyjnyotsjtqrp.supabase.co",
   "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ"
 );
 
-function status(msg) {
-  document.getElementById("status").innerText = msg;
-}
-
-async function register() {
-  const user = document.getElementById("ruser").value.trim();
-  const pass = document.getElementById("rpass").value.trim();
-
-  const email = user + "@app.com";
-
-  const { error } = await supabase.auth.signUp({
-    email: email,
-    password: pass
-  });
-
-  if (error) {
-    status("❌ " + error.message);
-  } else {
-    status("✅ Register berhasil");
-  }
-}
-
 async function login() {
-  const user = document.getElementById("luser").value.trim();
-  const pass = document.getElementById("lpass").value.trim();
+  const email = document.getElementById("user").value + "@app.com";
+  const pass = document.getElementById("pass").value;
 
-  const email = user + "@app.com";
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email: email,
+  const { error } = await client.auth.signInWithPassword({
+    email,
     password: pass
   });
 
   if (error) {
-    status("❌ " + error.message);
+    document.getElementById("status").innerText = error.message;
   } else {
-    status("✅ Login berhasil");
+    // 👉 PINDAH KE DASHBOARD
+    window.location.href = "dashboard.html";
   }
 }
 </script>
