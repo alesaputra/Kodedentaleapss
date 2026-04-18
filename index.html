@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Test Supabase Auth</title>
+  <title>Dental App Login</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
@@ -31,8 +31,13 @@ const supabase = window.supabase.createClient(
 
 // REGISTER
 async function register() {
-  const user = document.getElementById("ruser").value;
-  const pass = document.getElementById("rpass").value;
+  const user = document.getElementById("ruser").value.trim();
+  const pass = document.getElementById("rpass").value.trim();
+
+  if (!user || !pass) {
+    status("Isi semua field!");
+    return;
+  }
 
   const email = user + "@app.com";
 
@@ -42,29 +47,40 @@ async function register() {
   });
 
   if (error) {
-    document.getElementById("status").innerText = "Register gagal: " + error.message;
+    status("❌ Register gagal: " + error.message);
   } else {
-    document.getElementById("status").innerText = "Register berhasil!";
+    status("✅ Register berhasil! Sekarang login.");
   }
 }
 
 // LOGIN
 async function login() {
-  const user = document.getElementById("luser").value;
-  const pass = document.getElementById("lpass").value;
+  const user = document.getElementById("luser").value.trim();
+  const pass = document.getElementById("lpass").value.trim();
+
+  if (!user || !pass) {
+    status("Isi semua field!");
+    return;
+  }
 
   const email = user + "@app.com";
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error, data } = await supabase.auth.signInWithPassword({
     email: email,
     password: pass
   });
 
   if (error) {
-    document.getElementById("status").innerText = "Login gagal: " + error.message;
+    status("❌ Login gagal: " + error.message);
   } else {
-    document.getElementById("status").innerText = "Login BERHASIL!";
+    status("✅ Login BERHASIL!");
+    console.log("User:", data);
   }
+}
+
+// helper
+function status(msg) {
+  document.getElementById("status").innerText = msg;
 }
 </script>
 
