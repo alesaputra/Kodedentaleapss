@@ -3,205 +3,66 @@
 <head>
   <title>Dental App</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-  <style>
-    body {
-      font-family: Arial;
-      background: linear-gradient(135deg, #1e3c72, #2a5298);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      color: white;
-    }
-
-    .card {
-      background: rgba(255,255,255,0.1);
-      padding: 25px;
-      border-radius: 12px;
-      width: 350px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 6px;
-      border: none;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #00c6ff;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .link {
-      margin-top: 10px;
-      cursor: pointer;
-      text-align: center;
-      color: #ccc;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .obat-item {
-      background: rgba(255,255,255,0.1);
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 10px;
-    }
-  </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginBox" class="card">
-  <h2>Login</h2>
-  <input id="loginEmail" placeholder="Email">
-  <input id="loginPassword" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-  <div class="link" onclick="showRegister()">Belum punya akun? Register</div>
-</div>
+<h2>Login</h2>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
 
-<!-- REGISTER -->
-<div id="registerBox" class="card hidden">
-  <h2>Register</h2>
-  <input id="regEmail" placeholder="Email">
-  <input id="regPassword" type="password" placeholder="Password">
-  <button onclick="register()">Register</button>
-  <div class="link" onclick="showLogin()">Sudah punya akun? Login</div>
-</div>
+<h2>Register</h2>
+<input id="regEmail" placeholder="Email">
+<input id="regPassword" type="password" placeholder="Password">
+<button onclick="register()">Register</button>
 
-<!-- APP -->
-<div id="appBox" class="card hidden">
-  <h2>Data Obat</h2>
-  <div id="listObat"></div>
-  <button onclick="logout()">Logout</button>
-</div>
+<div id="data"></div>
 
 <script>
-// ================= CONFIG =================
 const SUPABASE_URL = "https://bhtlwacoyjnyotsjtqrp.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ";
 
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ================= UI SWITCH =================
-function showRegister(){
-  document.getElementById("loginBox").classList.add("hidden");
-  document.getElementById("registerBox").classList.remove("hidden");
-}
-
-function showLogin(){
-  document.getElementById("registerBox").classList.add("hidden");
-  document.getElementById("loginBox").classList.remove("hidden");
-}
-
-// ================= REGISTER =================
+// REGISTER
 async function register(){
   const email = document.getElementById("regEmail").value;
   const password = document.getElementById("regPassword").value;
 
-  const { data, error } = await supabase.auth.signUp({
-    email: email,
-    password: password
-  });
+  const { error } = await supabase.auth.signUp({ email, password });
 
   if(error){
-    alert("Register gagal: " + error.message);
-    return;
+    alert(error.message);
+  } else {
+    alert("Register berhasil!");
   }
-
-  alert("Register berhasil! Silakan login");
-  showLogin();
 }
 
-// ================= LOGIN =================
+// LOGIN
 async function login(){
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email,
-    password: password
-  });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if(error){
-    alert("Login gagal: " + error.message);
-    return;
-  }
-
-  showApp();
-  loadData();
-}
-
-// ================= AUTO LOGIN =================
-async function checkUser(){
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if(session){
-    showApp();
+    alert(error.message);
+  } else {
     loadData();
   }
 }
 
-checkUser();
-
-// ================= SHOW APP =================
-function showApp(){
-  document.getElementById("loginBox").classList.add("hidden");
-  document.getElementById("registerBox").classList.add("hidden");
-  document.getElementById("appBox").classList.remove("hidden");
-}
-
-// ================= LOGOUT =================
-async function logout(){
-  await supabase.auth.signOut();
-  location.reload();
-}
-
-// ================= LOAD DATA =================
+// LOAD DATA
 async function loadData(){
-  const { data, error } = await supabase
-    .from("obat")
-    .select("*");
-
-  if(error){
-    alert("Gagal ambil data");
-    console.log(error);
-    return;
-  }
+  const { data } = await supabase.from("obat").select("*");
 
   let html = "";
-
   data.forEach(o => {
-    html += `
-      <div class="obat-item">
-        <b>${o.nama}</b><br>
-        ${o.kategori}<br>
-        Dewasa: ${o.dosis_dewasa}<br>
-        Anak: ${o.dosis_anak}<br>
-        Indikasi: ${o.indikasi}<br>
-        Merk: ${o.merk}
-      </div>
-    `;
+    html += `<p>${o.nama} - ${o.dosis_dewasa}</p>`;
   });
 
-  document.getElementById("listObat").innerHTML = html;
+  document.getElementById("data").innerHTML = html;
 }
 </script>
 
