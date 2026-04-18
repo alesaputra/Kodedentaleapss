@@ -1,54 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Dental App</title>
+  <title>Dental Dashboard</title>
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body class="bg-gradient-to-br from-blue-600 to-teal-500 min-h-screen flex items-center justify-center">
+<body class="bg-gray-100">
 
-<div class="bg-white rounded-2xl shadow-2xl flex w-[800px] overflow-hidden">
+<div class="flex h-screen">
 
-  <!-- LEFT SIDE -->
-  <div class="w-1/2 bg-blue-600 text-white p-10 flex flex-col justify-center">
-    <h1 class="text-3xl font-bold mb-4">Dental Clinic</h1>
-    <p class="text-sm opacity-90">
-      Sistem manajemen klinik gigi modern untuk membantu pelayanan pasien lebih cepat dan efisien.
-    </p>
+  <!-- SIDEBAR -->
+  <div class="w-64 bg-blue-700 text-white p-5">
+    <h2 class="text-xl font-bold mb-6">Dental App</h2>
+
+    <ul class="space-y-3">
+      <li onclick="show('dashboard')" class="cursor-pointer hover:underline">Dashboard</li>
+      <li onclick="show('patients')" class="cursor-pointer hover:underline">Pasien</li>
+      <li onclick="show('schedule')" class="cursor-pointer hover:underline">Jadwal</li>
+      <li onclick="logout()" class="cursor-pointer text-red-300 mt-10">Logout</li>
+    </ul>
   </div>
 
-  <!-- RIGHT SIDE -->
-  <div class="w-1/2 p-10">
+  <!-- CONTENT -->
+  <div class="flex-1 p-6 overflow-auto">
 
-    <h2 id="title" class="text-2xl font-bold mb-6 text-gray-700">Login</h2>
-
-    <div class="space-y-4">
-      <input id="username"
-        class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-        placeholder="Username">
-
-      <input id="password" type="password"
-        class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-        placeholder="Password">
-
-      <button onclick="submit()"
-        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
-        Login
-      </button>
+    <!-- DASHBOARD -->
+    <div id="dashboard">
+      <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
+      <p>Selamat datang di sistem klinik gigi.</p>
     </div>
 
-    <p onclick="toggle()" id="switch"
-      class="text-sm text-center mt-4 text-gray-500 cursor-pointer">
-      Belum punya akun? Register
-    </p>
+    <!-- PATIENTS -->
+    <div id="patients" class="hidden">
+      <h1 class="text-2xl font-bold mb-4">Data Pasien</h1>
 
-    <p id="status" class="text-center text-sm mt-3 text-red-500"></p>
+      <div class="bg-white p-4 rounded shadow mb-4">
+        <input id="pname" placeholder="Nama"
+          class="border p-2 rounded mr-2">
+        <input id="pphone" placeholder="No HP"
+          class="border p-2 rounded mr-2">
+        <button onclick="addPatient()"
+          class="bg-blue-600 text-white px-4 py-2 rounded">
+          Tambah
+        </button>
+      </div>
+
+      <table class="w-full bg-white rounded shadow">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="p-2 text-left">Nama</th>
+            <th class="p-2 text-left">No HP</th>
+          </tr>
+        </thead>
+        <tbody id="patientList"></tbody>
+      </table>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div id="schedule" class="hidden">
+      <h1 class="text-2xl font-bold mb-4">Jadwal</h1>
+
+      <div class="bg-white p-4 rounded shadow mb-4">
+        <input id="sname" placeholder="Nama Pasien"
+          class="border p-2 rounded mr-2">
+        <input id="sdate" type="date"
+          class="border p-2 rounded mr-2">
+        <button onclick="addSchedule()"
+          class="bg-green-600 text-white px-4 py-2 rounded">
+          Tambah
+        </button>
+      </div>
+
+      <ul id="scheduleList" class="space-y-2"></ul>
+    </div>
 
   </div>
 
@@ -60,59 +86,90 @@ const client = window.supabase.createClient(
   "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ"
 );
 
-let isLogin = true;
+// ================= NAVIGATION =================
+function show(section) {
+  ["dashboard","patients","schedule"].forEach(id => {
+    document.getElementById(id).classList.add("hidden");
+  });
+  document.getElementById(section).classList.remove("hidden");
 
-function toggle() {
-  isLogin = !isLogin;
-
-  document.getElementById("title").innerText = isLogin ? "Login" : "Register";
-  document.querySelector("button").innerText = isLogin ? "Login" : "Register";
-  document.getElementById("switch").innerText = isLogin
-    ? "Belum punya akun? Register"
-    : "Sudah punya akun? Login";
-
-  document.getElementById("status").innerText = "";
+  if (section === "patients") loadPatients();
 }
 
-async function submit() {
-  const user = document.getElementById("username").value;
-  const pass = document.getElementById("password").value;
-  const email = user + "@app.com";
-
-  if (!user || !pass) {
-    setStatus("Isi semua field!");
-    return;
-  }
-
-  if (isLogin) {
-    const { error } = await client.auth.signInWithPassword({
-      email,
-      password: pass
-    });
-
-    if (error) {
-      setStatus(error.message);
-    } else {
-      setStatus("Login berhasil!", true);
-      setTimeout(() => {
-        alert("Next: masuk dashboard");
-      }, 500);
-    }
-
-  } else {
-    const { error } = await client.auth.signUp({
-      email,
-      password: pass
-    });
-
-    setStatus(error ? error.message : "Register berhasil!", !error);
+// ================= AUTH =================
+async function checkUser() {
+  const { data } = await client.auth.getUser();
+  if (!data.user) {
+    alert("Silakan login dulu!");
+    window.location.href = "index.html";
   }
 }
+checkUser();
 
-function setStatus(msg, success = false) {
-  const el = document.getElementById("status");
-  el.innerText = msg;
-  el.className = "text-center text-sm mt-3 " + (success ? "text-green-500" : "text-red-500");
+async function logout() {
+  await client.auth.signOut();
+  window.location.href = "index.html";
+}
+
+// ================= PATIENT =================
+async function addPatient() {
+  const name = document.getElementById("pname").value;
+  const phone = document.getElementById("pphone").value;
+
+  if (!name) return alert("Nama wajib!");
+
+  await client.from("patients").insert([{ name, phone }]);
+
+  document.getElementById("pname").value = "";
+  document.getElementById("pphone").value = "";
+
+  loadPatients();
+}
+
+async function loadPatients() {
+  const { data } = await client.from("patients").select("*");
+
+  const list = document.getElementById("patientList");
+  list.innerHTML = "";
+
+  data.forEach(p => {
+    list.innerHTML += `
+      <tr>
+        <td class="p-2">${p.name}</td>
+        <td class="p-2">${p.phone || "-"}</td>
+      </tr>
+    `;
+  });
+}
+
+// ================= SCHEDULE =================
+let schedules = [];
+
+function addSchedule() {
+  const name = document.getElementById("sname").value;
+  const date = document.getElementById("sdate").value;
+
+  if (!name || !date) return alert("Isi semua!");
+
+  schedules.push({ name, date });
+
+  document.getElementById("sname").value = "";
+  document.getElementById("sdate").value = "";
+
+  renderSchedule();
+}
+
+function renderSchedule() {
+  const list = document.getElementById("scheduleList");
+  list.innerHTML = "";
+
+  schedules.forEach(s => {
+    list.innerHTML += `
+      <li class="bg-white p-3 rounded shadow">
+        ${s.name} - ${s.date}
+      </li>
+    `;
+  });
 }
 </script>
 
