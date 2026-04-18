@@ -3,169 +3,77 @@
 <head>
   <title>Dental App</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body {
-      font-family: Arial;
-      background: #2f4a7c;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .box {
-      background: #3d5a99;
-      padding: 30px;
-      border-radius: 10px;
-      width: 300px;
-    }
-
-    input {
-      width: 100%;
-      margin: 5px 0;
-      padding: 8px;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      background: #00bcd4;
-      border: none;
-      color: white;
-      cursor: pointer;
-    }
-
-    .hidden {
-      display: none;
-    }
-  </style>
 </head>
+
 <body>
 
-<div class="box" id="loginBox">
-  <h2>Login</h2>
-  <input id="loginUsername" placeholder="Username">
-  <input id="loginPassword" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
+<h2>Login</h2>
+<input id="loginUsername" placeholder="Username">
+<input id="loginPassword" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
 
-  <p>Belum punya akun? <a href="#" onclick="showRegister()">Register</a></p>
-</div>
+<h2>Register</h2>
+<input id="regUsername" placeholder="Username">
+<input id="regEmail" placeholder="Email">
+<input id="regPassword" type="password" placeholder="Password">
+<button onclick="register()">Register</button>
 
-<div class="box hidden" id="registerBox">
-  <h2>Register</h2>
-  <input id="regUsername" placeholder="Username">
-  <input id="regEmail" placeholder="Email">
-  <input id="regPassword" type="password" placeholder="Password">
-  <button onclick="register()">Register</button>
+<hr>
 
-  <p><a href="#" onclick="showLogin()">Kembali ke Login</a></p>
-</div>
-
-<div class="box hidden" id="appBox">
-  <h2>Data Obat</h2>
-  <div id="dataObat"></div>
+<div id="app" style="display:none">
+  <h2>Berhasil Login</h2>
   <button onclick="logout()">Logout</button>
 </div>
 
 <script>
-  // 🔥 CONFIG (PASTIKAN HANYA SEKALI!)
-  const SUPABASE_URL = "https://bhtlwacoyjnyotsjtqrp.supabase.co";
-  const SUPABASE_KEY = "ISI_DENGAN_KEY_KAMU"; // <-- ganti
+const SUPABASE_URL = "https://bhtlwacoyjnyotsjtqrp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ";
 
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // ================= LOGIN =================
-  async function login() {
-    const username = document.getElementById("loginUsername").value;
-    const password = document.getElementById("loginPassword").value;
+// LOGIN
+async function login() {
+  const username = document.getElementById("loginUsername").value;
+  const password = document.getElementById("loginPassword").value;
 
-    const email = username + "@app.com"; // trik username
+  const email = username + "@app.com";
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
 
-    if (error) {
-      alert("Login gagal: " + error.message);
-    } else {
-      showApp();
-    }
+  if (error) {
+    alert("Login gagal: " + error.message);
+  } else {
+    document.getElementById("app").style.display = "block";
   }
+}
 
-  // ================= REGISTER =================
-  async function register() {
-    const username = document.getElementById("regUsername").value;
-    const emailInput = document.getElementById("regEmail").value;
-    const password = document.getElementById("regPassword").value;
+// REGISTER
+async function register() {
+  const username = document.getElementById("regUsername").value;
+  const password = document.getElementById("regPassword").value;
 
-    const email = username + "@app.com";
+  const email = username + "@app.com";
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username: username,
-          real_email: emailInput
-        }
-      }
-    });
+  const { error } = await supabase.auth.signUp({
+    email,
+    password
+  });
 
-    if (error) {
-      alert("Register gagal: " + error.message);
-    } else {
-      alert("Register berhasil! Silakan login");
-      showLogin();
-    }
+  if (error) {
+    alert("Register gagal: " + error.message);
+  } else {
+    alert("Register berhasil! Silakan login");
   }
+}
 
-  // ================= UI =================
-  function showRegister() {
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("registerBox").classList.remove("hidden");
-  }
-
-  function showLogin() {
-    document.getElementById("registerBox").classList.add("hidden");
-    document.getElementById("loginBox").classList.remove("hidden");
-  }
-
-  function showApp() {
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("registerBox").classList.add("hidden");
-    document.getElementById("appBox").classList.remove("hidden");
-
-    loadObat();
-  }
-
-  function logout() {
-    location.reload();
-  }
-
-  // ================= DATA OBAT =================
-  function loadObat() {
-    const data = [
-      "Paracetamol - 500 mg 3x",
-      "Ibuprofen - 400 mg 3x",
-      "Amoxicillin - 500 mg 3x",
-      "Cefadroxil - 500 mg 2x",
-      "Metronidazole - 500 mg 3x",
-      "Asam Mefenamat - 500 mg 3x",
-      "Dexamethasone - 0.5 mg 2x",
-      "Clindamycin - 300 mg 3x",
-      "Ketorolac - 10 mg 3x"
-    ];
-
-    let html = "";
-    data.forEach(item => {
-      html += "<p>" + item + "</p>";
-    });
-
-    document.getElementById("dataObat").innerHTML = html;
-  }
+// LOGOUT
+async function logout() {
+  await supabase.auth.signOut();
+  location.reload();
+}
 </script>
 
 </body>
