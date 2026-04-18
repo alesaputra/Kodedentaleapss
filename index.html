@@ -2,50 +2,60 @@
 <html>
 <head>
   <title>Dental App</title>
-
-  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
   <style>
     body {
       font-family: Arial;
-      background: linear-gradient(135deg,#1e3c72,#2a5298);
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      display: flex;
+      justify-content: center;
+      align-items: center;
       height: 100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      margin:0;
+      margin: 0;
+      color: white;
     }
 
     .card {
       background: rgba(255,255,255,0.1);
-      padding:30px;
-      border-radius:15px;
-      backdrop-filter: blur(10px);
-      width:300px;
-      color:white;
+      padding: 25px;
+      border-radius: 12px;
+      width: 350px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
     }
 
     input {
-      width:100%;
-      padding:10px;
-      margin:10px 0;
-      border:none;
-      border-radius:8px;
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: none;
     }
 
     button {
-      width:100%;
-      padding:10px;
-      border:none;
-      border-radius:8px;
-      background:#00c6ff;
-      color:white;
-      cursor:pointer;
+      width: 100%;
+      padding: 10px;
+      background: #00c6ff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0096c7;
     }
 
     .hidden {
-      display:none;
+      display: none;
+    }
+
+    .obat-item {
+      background: rgba(255,255,255,0.1);
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -53,7 +63,7 @@
 <body>
 
 <!-- LOGIN -->
-<div class="card" id="loginBox">
+<div id="loginBox" class="card">
   <h2>Login</h2>
   <input id="user" placeholder="Username">
   <input id="pass" type="password" placeholder="Password">
@@ -61,65 +71,71 @@
 </div>
 
 <!-- APP -->
-<div class="card hidden" id="appBox">
+<div id="appBox" class="card hidden">
   <h2>Data Obat</h2>
-  <div id="dataObat"></div>
+  <div id="listObat"></div>
   <button onclick="logout()">Logout</button>
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-
-// 👉 GANTI DENGAN PUNYA KAMU
+// ================= CONFIG =================
 const SUPABASE_URL = "https://bhtlwacoyjnyotsjtqrp.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ";
 
-// init (HANYA SEKALI!)
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-
-/* ================= LOGIN ================= */
-
-function login(){
-  const u = document.getElementById("user").value;
-  const p = document.getElementById("pass").value;
+// ================= LOGIN =================
+function login() {
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pass").value;
 
   if(u === "admin" && p === "123"){
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("appBox").classList.remove("hidden");
     loadData();
   } else {
-    alert("Login salah");
+    alert("Login salah!");
   }
 }
 
+// ================= LOGOUT =================
+function logout(){
+  location.reload();
+}
 
-/* ================= LOAD DATA ================= */
-
+// ================= LOAD DATA =================
 async function loadData(){
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from("obat")
     .select("*");
 
   if(error){
+    alert("Error ambil data");
     console.log(error);
-    alert("Gagal ambil data");
     return;
   }
 
   let html = "";
-  data.forEach(o=>{
-    html += `<p><b>${o.nama}</b> - ${o.dosis_dewasa}</p>`;
+
+  data.forEach(o => {
+    html += `
+      <div class="obat-item">
+        <b>${o.nama}</b><br>
+        Kategori: ${o.kategori}<br>
+        Dosis Dewasa: ${o.dosis_dewasa}<br>
+        Dosis Anak: ${o.dosis_anak}<br>
+        Indikasi: ${o.indikasi}<br>
+        Kontra: ${o.kontraindikasi}<br>
+        Merk: ${o.merk}<br>
+        Keterangan: ${o.kie}
+      </div>
+    `;
   });
 
-  document.getElementById("dataObat").innerHTML = html;
-}
-
-
-/* ================= LOGOUT ================= */
-
-function logout(){
-  location.reload();
+  document.getElementById("listObat").innerHTML = html;
 }
 </script>
 
