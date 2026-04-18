@@ -1,23 +1,91 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>FINAL FIX</title>
+  <title>Dental App Login</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #4e73df, #1cc88a);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      width: 320px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #4e73df;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #2e59d9;
+    }
+
+    .switch {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #666;
+      cursor: pointer;
+    }
+
+    #status {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
 </head>
 
 <body>
 
-<h2>Register</h2>
-<input id="ruser"><br>
-<input id="rpass" type="password"><br>
-<button onclick="register()">Register</button>
+<div class="card">
 
-<h2>Login</h2>
-<input id="luser"><br>
-<input id="lpass" type="password"><br>
-<button onclick="login()">Login</button>
+  <h2 id="title">Login</h2>
 
-<div id="status"></div>
+  <input id="username" placeholder="Username">
+  <input id="password" type="password" placeholder="Password">
+
+  <button onclick="submit()">Login</button>
+
+  <div class="switch" onclick="toggle()">
+    Belum punya akun? Register
+  </div>
+
+  <div id="status"></div>
+
+</div>
 
 <script>
 const client = window.supabase.createClient(
@@ -25,30 +93,57 @@ const client = window.supabase.createClient(
   "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ"
 );
 
-async function register() {
-  const email = document.getElementById("ruser").value + "@app.com";
-  const pass = document.getElementById("rpass").value;
+let isLogin = true;
 
-  const { error } = await client.auth.signUp({
-    email: email,
-    password: pass
-  });
+function toggle() {
+  isLogin = !isLogin;
 
-  document.getElementById("status").innerText =
-    error ? error.message : "REGISTER OK";
+  document.getElementById("title").innerText = isLogin ? "Login" : "Register";
+  document.querySelector("button").innerText = isLogin ? "Login" : "Register";
+  document.querySelector(".switch").innerText = isLogin
+    ? "Belum punya akun? Register"
+    : "Sudah punya akun? Login";
+
+  document.getElementById("status").innerText = "";
 }
 
-async function login() {
-  const email = document.getElementById("luser").value + "@app.com";
-  const pass = document.getElementById("lpass").value;
+async function submit() {
+  const user = document.getElementById("username").value;
+  const pass = document.getElementById("password").value;
+  const email = user + "@app.com";
 
-  const { error } = await client.auth.signInWithPassword({
-    email: email,
-    password: pass
-  });
+  if (!user || !pass) {
+    status("Isi semua field!");
+    return;
+  }
 
-  document.getElementById("status").innerText =
-    error ? error.message : "LOGIN OK";
+  if (isLogin) {
+    const { error } = await client.auth.signInWithPassword({
+      email,
+      password: pass
+    });
+
+    status(error ? error.message : "Login berhasil!");
+
+    if (!error) {
+      // contoh redirect
+      setTimeout(() => {
+        alert("Masuk ke dashboard (next step)");
+      }, 500);
+    }
+
+  } else {
+    const { error } = await client.auth.signUp({
+      email,
+      password: pass
+    });
+
+    status(error ? error.message : "Register berhasil!");
+  }
+}
+
+function status(msg) {
+  document.getElementById("status").innerText = msg;
 }
 </script>
 
