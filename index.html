@@ -29,15 +29,13 @@ const supabase = window.supabase.createClient(
   "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ"
 );
 
-// REGISTER
+function status(msg) {
+  document.getElementById("status").innerText = msg;
+}
+
 async function register() {
   const user = document.getElementById("ruser").value.trim();
   const pass = document.getElementById("rpass").value.trim();
-
-  if (!user || !pass) {
-    status("Isi semua field!");
-    return;
-  }
 
   const email = user + "@app.com";
 
@@ -47,40 +45,28 @@ async function register() {
   });
 
   if (error) {
-    status("❌ Register gagal: " + error.message);
+    status("❌ " + error.message);
   } else {
-    status("✅ Register berhasil! Sekarang login.");
+    status("✅ Register berhasil");
   }
 }
 
-// LOGIN
 async function login() {
   const user = document.getElementById("luser").value.trim();
   const pass = document.getElementById("lpass").value.trim();
 
-  if (!user || !pass) {
-    status("Isi semua field!");
-    return;
-  }
-
   const email = user + "@app.com";
 
-  const { error, data } = await supabase.auth.signInWithPassword({
+  const { error } = await supabase.auth.signInWithPassword({
     email: email,
     password: pass
   });
 
   if (error) {
-    status("❌ Login gagal: " + error.message);
+    status("❌ " + error.message);
   } else {
-    status("✅ Login BERHASIL!");
-    console.log("User:", data);
+    status("✅ Login berhasil");
   }
-}
-
-// helper
-function status(msg) {
-  document.getElementById("status").innerText = msg;
 }
 </script>
 
