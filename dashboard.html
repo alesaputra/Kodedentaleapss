@@ -20,6 +20,7 @@
 
     <ul class="space-y-3">
       <li onclick="show('dashboard')" class="cursor-pointer hover:underline">Dashboard</li>
+      <li onclick="show('patients')" class="cursor-pointer hover:underline">Pasien</li>
       <li onclick="show('resep')" class="cursor-pointer hover:underline">Resep Obat</li>
       <li onclick="logout()" class="cursor-pointer text-red-300 mt-10">Logout</li>
     </ul>
@@ -30,105 +31,179 @@
 
     <!-- DASHBOARD -->
     <div id="dashboard">
-      <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
+      <h1 class="text-2xl font-bold mb-2">Dashboard</h1>
       <p>Selamat datang di sistem klinik gigi.</p>
     </div>
 
-    <!-- RESEP -->
+    <!-- ================= PASIEN ================= -->
+    <div id="patients" class="hidden">
+
+      <h1 class="text-2xl font-bold mb-4">Data Pasien</h1>
+
+      <!-- FORM -->
+      <div class="bg-white p-4 rounded shadow mb-4">
+        <input id="no_rm" placeholder="No Rekam Medis" class="border p-2 mb-2 w-full">
+        <input id="nama" placeholder="Nama Pasien" class="border p-2 mb-2 w-full">
+        <input id="umur" type="number" placeholder="Umur" class="border p-2 mb-2 w-full">
+        <input id="alamat" placeholder="Alamat" class="border p-2 mb-2 w-full">
+        <input id="no_hp" placeholder="No HP" class="border p-2 mb-2 w-full">
+
+        <button onclick="tambahPasien()" class="bg-blue-600 text-white p-2 w-full rounded">
+          Simpan Pasien
+        </button>
+      </div>
+
+      <!-- LIST -->
+      <div class="bg-white p-4 rounded shadow">
+        <h2 class="font-bold mb-2">List Pasien</h2>
+        <div id="listPasien"></div>
+      </div>
+
+    </div>
+
+    <!-- ================= RESEP ================= -->
     <div id="resep" class="hidden">
+
       <h1 class="text-2xl font-bold mb-4">Resep Obat</h1>
 
-      <input id="pasien" placeholder="Nama Pasien" class="border p-2 mb-2 w-full rounded">
-      <input id="obat" placeholder="Nama Obat" class="border p-2 mb-2 w-full rounded">
-      <input id="dosis" placeholder="Dosis" class="border p-2 mb-2 w-full rounded">
+      <div class="bg-white p-4 rounded shadow mb-4">
+        <input id="pasien" placeholder="Nama Pasien" class="border p-2 mb-2 w-full">
+        <input id="obat" placeholder="Nama Obat" class="border p-2 mb-2 w-full">
+        <input id="dosis" placeholder="Dosis" class="border p-2 mb-2 w-full">
 
-      <button onclick="tambahResep()" class="bg-blue-600 text-white p-2 rounded w-full">
-        Simpan Resep
-      </button>
+        <button onclick="tambahResep()" class="bg-blue-600 text-white p-2 w-full rounded">
+          Simpan Resep
+        </button>
+      </div>
 
-      <div id="listResep" class="mt-4"></div>
+      <div class="bg-white p-4 rounded shadow">
+        <h2 class="font-bold mb-2">List Resep</h2>
+        <div id="listResep"></div>
+      </div>
+
     </div>
 
   </div>
 </div>
 
 <script>
-// 🔗 SUPABASE CONFIG (PASTIKAN SAMA)
-const client = window.supabase.createClient(
-  "https://bhtlwacoyjnyotsjtqrp.supabase.co",
-  "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ"
-);
+  // ================= SUPABASE =================
+  const client = supabase.createClient(
+    "https://YOUR_URL.supabase.co",
+    "YOUR_ANON_KEY"
+  );
 
-// 🔁 NAVIGASI
-function show(page) {
-  document.getElementById("dashboard").classList.add("hidden");
-  document.getElementById("resep").classList.add("hidden");
+  // ================= NAVIGATION =================
+  function show(menu) {
+    document.getElementById("dashboard").classList.add("hidden");
+    document.getElementById("patients").classList.add("hidden");
+    document.getElementById("resep").classList.add("hidden");
 
-  document.getElementById(page).classList.remove("hidden");
-
-  if (page === "resep") loadResep();
-}
-
-// ➕ TAMBAH RESEP
-async function tambahResep() {
-  const pasien = document.getElementById("pasien").value;
-  const obat = document.getElementById("obat").value;
-  const dosis = document.getElementById("dosis").value;
-
-  if (!pasien || !obat || !dosis) {
-    alert("Isi semua field!");
-    return;
+    document.getElementById(menu).classList.remove("hidden");
   }
 
-  const { error } = await client.from("resep").insert([
-    { pasien, obat, dosis }
-  ]);
-
-  if (error) {
-    alert("Gagal: " + error.message);
-  } else {
-    alert("Berhasil disimpan!");
-    document.getElementById("pasien").value = "";
-    document.getElementById("obat").value = "";
-    document.getElementById("dosis").value = "";
-
-    loadResep();
-  }
-}
-
-// 📥 LOAD DATA
-async function loadResep() {
-  const { data, error } = await client
-    .from("resep")
-    .select("*")
-    .order("id", { ascending: false });
-
-  if (error) {
-    alert(error.message);
-    return;
+  function logout() {
+    window.location.href = "index.html";
   }
 
-  let html = "";
+  // ================= PASIEN =================
+  async function tambahPasien() {
+    const no_rm = document.getElementById("no_rm").value;
+    const nama = document.getElementById("nama").value;
+    const umur = document.getElementById("umur").value;
+    const alamat = document.getElementById("alamat").value;
+    const no_hp = document.getElementById("no_hp").value;
 
-  data.forEach(r => {
-    html += `
-      <div class="bg-white p-3 mb-2 rounded shadow">
-        <b>${r.pasien}</b><br>
-        ${r.obat} - ${r.dosis}
-      </div>
-    `;
-  });
+    if (!no_rm || !nama) {
+      alert("No RM & Nama wajib diisi");
+      return;
+    }
 
-  document.getElementById("listResep").innerHTML = html;
-}
+    const { error } = await client.from("patients").insert([
+      { no_rm, nama, umur, alamat, no_hp }
+    ]);
 
-// 🚪 LOGOUT
-function logout() {
-  window.location.href = "index.html";
-}
+    if (error) {
+      alert("Gagal: " + error.message);
+    } else {
+      alert("Berhasil tambah pasien");
+      loadPasien();
+    }
+  }
 
-// LOAD AWAL
-loadResep();
+  async function loadPasien() {
+    const { data } = await client
+      .from("patients")
+      .select("*")
+      .order("id", { ascending: false });
+
+    let html = "";
+
+    data.forEach(p => {
+      html += `
+        <div class="border p-2 mb-2 flex justify-between">
+          <div>
+            <b>${p.nama}</b> (${p.no_rm})<br>
+            Umur: ${p.umur || "-"} | HP: ${p.no_hp || "-"}
+          </div>
+
+          <button onclick="hapusPasien(${p.id})" class="text-red-500">
+            Hapus
+          </button>
+        </div>
+      `;
+    });
+
+    document.getElementById("listPasien").innerHTML = html;
+  }
+
+  async function hapusPasien(id) {
+    if (!confirm("Hapus pasien?")) return;
+
+    await client.from("patients").delete().eq("id", id);
+    loadPasien();
+  }
+
+  // ================= RESEP =================
+  async function tambahResep() {
+    const pasien = document.getElementById("pasien").value;
+    const obat = document.getElementById("obat").value;
+    const dosis = document.getElementById("dosis").value;
+
+    const { error } = await client.from("resep").insert([
+      { pasien, obat, dosis }
+    ]);
+
+    if (error) {
+      alert("Gagal: " + error.message);
+    } else {
+      alert("Resep tersimpan");
+      loadResep();
+    }
+  }
+
+  async function loadResep() {
+    const { data } = await client
+      .from("resep")
+      .select("*")
+      .order("id", { ascending: false });
+
+    let html = "";
+
+    data.forEach(r => {
+      html += `
+        <div class="border p-2 mb-2">
+          <b>${r.pasien}</b> - ${r.obat} (${r.dosis})
+        </div>
+      `;
+    });
+
+    document.getElementById("listResep").innerHTML = html;
+  }
+
+  // ================= INIT =================
+  loadPasien();
+  loadResep();
 
 </script>
 
