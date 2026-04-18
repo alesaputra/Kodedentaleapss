@@ -1,78 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dental App</title>
+  <title>Test Supabase Auth</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
 
-<h2>Login</h2>
-<input id="loginUsername" placeholder="Username">
-<input id="loginPassword" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-
 <h2>Register</h2>
-<input id="regUsername" placeholder="Username">
-<input id="regEmail" placeholder="Email">
-<input id="regPassword" type="password" placeholder="Password">
+<input id="ruser" placeholder="username"><br>
+<input id="rpass" type="password" placeholder="password"><br>
 <button onclick="register()">Register</button>
 
 <hr>
 
-<div id="app" style="display:none">
-  <h2>Berhasil Login</h2>
-  <button onclick="logout()">Logout</button>
-</div>
+<h2>Login</h2>
+<input id="luser" placeholder="username"><br>
+<input id="lpass" type="password" placeholder="password"><br>
+<button onclick="login()">Login</button>
+
+<hr>
+
+<div id="status"></div>
 
 <script>
-const SUPABASE_URL = "https://bhtlwacoyjnyotsjtqrp.supabase.co";
-const SUPABASE_KEY = "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ";
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// LOGIN
-async function login() {
-  const username = document.getElementById("loginUsername").value;
-  const password = document.getElementById("loginPassword").value;
-
-  const email = username + "@app.com";
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    alert("Login gagal: " + error.message);
-  } else {
-    document.getElementById("app").style.display = "block";
-  }
-}
+const supabase = window.supabase.createClient(
+  "https://bhtlwacoyjnyotsjtqrp.supabase.co",
+  "sb_publishable_nVflF_SkxsLXkWQAxg4jTg_Kw5b97GJ"
+);
 
 // REGISTER
 async function register() {
-  const username = document.getElementById("regUsername").value;
-  const password = document.getElementById("regPassword").value;
+  const user = document.getElementById("ruser").value;
+  const pass = document.getElementById("rpass").value;
 
-  const email = username + "@app.com";
+  const email = user + "@app.com";
 
   const { error } = await supabase.auth.signUp({
-    email,
-    password
+    email: email,
+    password: pass
   });
 
   if (error) {
-    alert("Register gagal: " + error.message);
+    document.getElementById("status").innerText = "Register gagal: " + error.message;
   } else {
-    alert("Register berhasil! Silakan login");
+    document.getElementById("status").innerText = "Register berhasil!";
   }
 }
 
-// LOGOUT
-async function logout() {
-  await supabase.auth.signOut();
-  location.reload();
+// LOGIN
+async function login() {
+  const user = document.getElementById("luser").value;
+  const pass = document.getElementById("lpass").value;
+
+  const email = user + "@app.com";
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: pass
+  });
+
+  if (error) {
+    document.getElementById("status").innerText = "Login gagal: " + error.message;
+  } else {
+    document.getElementById("status").innerText = "Login BERHASIL!";
+  }
 }
 </script>
 
